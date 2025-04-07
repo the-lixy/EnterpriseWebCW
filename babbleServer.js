@@ -3,8 +3,34 @@ var express = require('express');
 var app = express();
 var ejs = require('ejs');
 
+// load environment variables
+require('dotenv').config(); // Load variables from .env
+
 // using ejs for templating
 app.set('view engine', 'ejs');
+
+// MongoDB setup
+const { MongoClient } = require('mongodb');
+// environment variable for database security
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
+// try and get first post in stories collection
+async function run() {
+  try {
+    await client.connect();
+    const db = client.db('EnterprizeWebCW');
+    const collection = db.collection('stories');
+
+    // Find the first document in the collection
+    const first = await collection.findOne();
+  } finally {
+    // Close the database connection when finished or an error occurs
+    await client.close();
+  }
+}
+run().catch(console.error);
+
+// pages
 
 // home page
 app.get('/', function(req, res){
