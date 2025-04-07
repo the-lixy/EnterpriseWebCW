@@ -1,8 +1,55 @@
-<html>
+<html lang="en">
     <head>
         <title>
-            my webbed site
+            Babbler
         </title>
+        <meta charset="utf-8">
+        <!--Bootstrap Imports -->
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> 
+        <!-- rendering and touch zooming for mobile -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Font Awesome Icon Library for star rating appearance -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <style>
+        .checked {
+        color: orange;
+        }
+        </style>
+
     </head>
-    <h1>hi</h1>
+
+    <div class="fluid-container">
+        <h2> Babbler </h2>
+    </div>
+
+    <div class="container">
+        <h4> Title </h4>
+        <!-- genre & rating boxes -->
+        <div class="row">
+
+            <div class="col-sm-1"> 
+                <p> genre </p>
+            </div>
+
+            <div class="col-sm-1"> 
+                <p> rating </p>
+            </div>
+            
+        </div>
+        
+        <p> story.....</p>
+        <p> user rating </p>
+        <span class="fa fa-star checked"></span>
+        <span class="fa fa-star checked"></span>
+        <span class="fa fa-star checked"></span>
+        <span class="fa fa-star"></span>
+        <span class="fa fa-star"></span> <br>
+        <button> submit user rating </button>
+
+    </div>
 </html>
