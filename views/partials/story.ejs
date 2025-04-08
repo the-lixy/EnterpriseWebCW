@@ -1,11 +1,12 @@
 <!-- Template for displaying stories -->
 <div class="container">
-    <h4 style="display:inline"> Title </h4> <p style="display:inline"> by User </p>
+    <% if (story) { %>
+    <h4 style="display:inline"> <%= story.title %> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
 
         <div class="col-sm-1"> 
-            <p> genre </p>
+            <p> <%= story.genre %> </p>
         </div>
 
         <div class="col-sm-11"> 
@@ -18,7 +19,7 @@
 
     </div>
     
-    <p> story.....</p>
+    <p> <%= story.story %> </p>
 
     <!-- User can submit a rating here -->
     <p style="display:inline"> Click to leave a rating: </p>
@@ -27,5 +28,10 @@
     <span class="fa fa-star"></span>
     <span class="fa fa-star"></span>
     <span class="fa fa-star"></span> <br>
+
+    
+    <% } else { %>
+        <p>No story found.</p>
+    <% } %>
 
 </div>
