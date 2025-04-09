@@ -3,8 +3,12 @@ var express = require('express');
 var app = express();
 var ejs = require('ejs');
 
+
 //for using post in forums
 app.use(express.urlencoded({extended:true}))
+
+//for parsing json requests
+app.use(express.json());
 
 // load environment variables
 require('dotenv').config(); // Load variables from .env
@@ -67,6 +71,23 @@ app.post('/submittedstory', function(req, res){
         })
     res.render('pages/submittedstory');
 });
+
+// when a story is rated, submit rating to database
+app.post('/rate', async (req, res) => {
+    try {
+      const { title, rating } = req.body;
+  
+      const result = await collection.updateOne(
+        { title },
+        { $set: { rating: parseInt(rating) } }
+      );
+  
+      res.json({ success: true, modified: result.modifiedCount });
+    } catch (err) {
+      console.error("Error updating rating:", err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
 // login page
 app.get('/login', function(req, res){
