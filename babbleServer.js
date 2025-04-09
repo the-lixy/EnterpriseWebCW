@@ -61,7 +61,8 @@ app.post('/submittedstory', function(req, res){
         story: req.body.story,
         genre: req.body.genre,
         author: "Anonymous", // I want to change this later!
-        rating: 0,
+        totalrating: 0,
+        numratings: 0,
     };
     
     db.collection('stories').insertOne(newstory, function(err, result) {
@@ -75,19 +76,19 @@ app.post('/submittedstory', function(req, res){
 // when a story is rated, submit rating to database
 app.post('/rate', async (req, res) => {
     try {
-      const { title, rating } = req.body;
-  
-      const result = await collection.updateOne(
-        { title },
-        { $set: { rating: parseInt(rating) } }
-      );
-  
-      res.json({ success: true, modified: result.modifiedCount });
+        const { title, rating } = req.body;
+        
+        // add the rating to the total number of ratings and increment the number of ratings by 1
+        const result = await collection.updateOne({ title },
+        { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)  } },
+        );
+
+        res.json({ success: true, modified: result.modifiedCount });
     } catch (err) {
-      console.error("Error updating rating:", err);
-      res.status(500).json({ success: false, error: err.message });
+        console.error("Error updating rating:", err);
+        res.status(500).json({ success: false, error: err.message });
     }
-  });
+    });
 
 // login page
 app.get('/login', function(req, res){
