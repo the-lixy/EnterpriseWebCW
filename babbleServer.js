@@ -36,8 +36,9 @@ let collection;
 // home page
 app.get('/', async(req, res) => {
     try {
-        const story = await collection.findOne(); // get first story
-        res.render('pages/homepage', { story });
+        //const story = await collection.findOne(); // get story
+        const stories = await collection.find({}).toArray(); // get all stories as an array
+        res.render('pages/homepage', { stories });
       } catch (err) {
         console.error(err);
         res.status(500).send('Error loading homepage');

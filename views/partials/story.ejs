@@ -1,6 +1,7 @@
 <!-- Template for displaying stories -->
 <div class="container">
-    <% if (story) { %>
+    <% if (stories.length > 0) { %>
+    <% stories.forEach(story => { %>
     <h4 style="display:inline"> <%= story.title %> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
@@ -28,10 +29,11 @@
     <span class="fa fa-star"></span>
     <span class="fa fa-star"></span>
     <span class="fa fa-star"></span> <br>
+    <br><br>
 
-    
+    <% }) %>
     <% } else { %>
-        <p>No story found.</p>
+      <p>No stories yet!</p>
     <% } %>
 
 </div>
