@@ -3,6 +3,9 @@ var express = require('express');
 var app = express();
 var ejs = require('ejs');
 
+var mongoose = require('mongoose');
+var bcrypt = require('bcrypt');
+var session = require('express-session');
 
 //for using post in forums
 app.use(express.urlencoded({extended:true}))
@@ -24,12 +27,27 @@ const client = new MongoClient(uri);
 
 let db;
 let collection;
+let User;
+
+// session for keeping users logged in
+app.use(session({
+    secret: 'secretkey', // use env var in prod
+    resave: false,
+    saveUninitialized: false
+  }));
+
+// function to authenticate login
+function checkAuth(req, res, next) {
+    if (req.session.userId) return next();
+    res.redirect('/login');
+  }
 
 (async () => {
     try {
       await client.connect();
       db = client.db('EnterprizeWebCW');
       collection = db.collection('stories');
+      User = db.collection('User')
     } catch (err) {
       console.error("Database connection failed:", err);
     }
@@ -107,6 +125,16 @@ app.post('/rate', async (req, res) => {
 app.get('/login', function(req, res){
     res.render('pages/login');
 });
+
+app.post('/login', async (req,res) => {
+    const user = await User.findOne({ username: req.body.username });
+    if (user && await bcrypt.compare(req.body.password, user.password)) {
+      req.session.userId = user._id;
+      res.redirect('/dashboard');
+    } else {
+      res.send("Invalid login");
+    }
+  });
 
 app.listen(8080);
 console.log("listening on port 8080");
