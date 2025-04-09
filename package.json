@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bson": "^6.10.3",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^5.1.0",

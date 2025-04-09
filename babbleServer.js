@@ -37,6 +37,12 @@ let collection;
 
 // pages --------------------------------------
 
+// get current path for navbar template rendering
+app.use((req, res, next) => {
+    res.locals.path = req.path;
+    next();
+  });
+
 // home page
 app.get('/', async(req, res) => {
     try {
@@ -63,6 +69,7 @@ app.post('/submittedstory', function(req, res){
         author: "Anonymous", // I want to change this later!
         totalrating: 0,
         numratings: 0,
+        rating: 0, // the average rating
     };
     
     db.collection('stories').insertOne(newstory, function(err, result) {
@@ -78,9 +85,15 @@ app.post('/rate', async (req, res) => {
     try {
         const { title, rating } = req.body;
         
+        // get the new average rating
+        story = await collection.findOne({ title: req.body.title }); // maybe use ID instead?
+        newTotal = story.totalrating + rating;
+        newNum = story.numratings + 1;
+        newRating = Math.round(newTotal / newNum);
+
         // add the rating to the total number of ratings and increment the number of ratings by 1
         const result = await collection.updateOne({ title },
-        { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)  } },
+        { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)}, $set: {rating: newRating} },
         );
 
         res.json({ success: true, modified: result.modifiedCount });

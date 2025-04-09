@@ -1,5 +1,29 @@
 <!-- Template for displaying stories -->
 
+<!-- script to display the ratings from the database -->
+ <!--
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select every rating container on the page
+        const ratingContainers = document.querySelectorAll('.rating-container');
+    
+        avgRatingContainers.forEach(container => {
+        const stars = container.querySelectorAll('.rating-star');
+
+        stars.forEach(star => {
+            storyTitle = container.dataset.storyTitle;
+            
+            // Add 'checked' until rating matches the database
+            for (let i = 0; i < index; i++) {
+                stars[i].classList.add('checked');
+                }
+        });
+
+        });
+    });
+
+ </script> -->
+
 <!-- script for allowing user to rate individual stories -->
  <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -57,19 +81,18 @@
             <p> <%= story.genre %> </p>
         </div>
 
-        <!-- STORY RATING NEEDS TO GO HERE -->
-        <div class="col-sm-11"> 
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star checked"></span>
-            <span class="fa fa-star"></span> <br>
+        <!-- average rating of the story -->
+        <div class="avg-rating-container"> 
+            <% for (let i = 1; i <= 5; i++) { %>
+                <span class="fa fa-star <%= i <= story.rating ? 'checked' : '' %>"></span>
+            <% } %>
         </div>
 
     </div>
     <p> <%= story.story %> </p>
 
     <div class="rating-container" data-story-title="<%= story.title %>">
+        <p style="display:inline"> Click to leave a rating: </p>
         <%- include('../partials/rating'); %>
     </div>
 
