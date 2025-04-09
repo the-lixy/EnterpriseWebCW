@@ -1,5 +1,33 @@
 <!-- Template for displaying stories -->
 
+<!-- script for allowing user to rate individual stories -->
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select every rating container on the page
+        const ratingContainers = document.querySelectorAll('.rating-container');
+    
+        ratingContainers.forEach(container => {
+          const stars = container.querySelectorAll('.rating-star');
+    
+          stars.forEach(star => {
+            star.addEventListener('click', () => {
+              const index = parseInt(star.dataset.index);
+    
+              // Remove 'checked' from all stars in this container
+              stars.forEach(s => s.classList.remove('checked'));
+    
+              // Add 'checked' up to the clicked star
+              for (let i = 0; i < index; i++) {
+                stars[i].classList.add('checked');
+              }
+    
+              console.log("Rated:", index);
+            });
+          });
+        });
+      });
+ </script>
+
 <div class="container">
     <% if (stories.length > 0) { %>
     <% stories.forEach(story => { %>
@@ -22,22 +50,10 @@
     </div>
     <p> <%= story.story %> </p>
 
-    <div>
+    <div class="rating-container">
         <%- include('../partials/rating'); %>
     </div>
-
-    <!-- User can submit a rating here -->
-    <!--
-    <p style="display:inline"> Click to leave a rating: </p>
-    <span class="fa fa-star" id="demo1" onclick="function1(2)"></span>
-    <span class="fa fa-star" id = "demo2" onclick="function1(3)"></span>
-    <span class="fa fa-star" id = "demo3" onclick="function1(4)"></span>
-    <span class="fa fa-star" id = "demo4" onclick="function1(5)"></span>
-    <span class="fa fa-star" id = "demo5" onclick="function1(6)"></span> <br> -->
     
-    <!-- TESTING PURPOSES - REMOVE AFTER DONE -->
-    <!-- <h2 id="test"> </h2> -->
-
     <br><br>
 
     <% }) %>

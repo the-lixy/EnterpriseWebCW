@@ -1,6 +1,6 @@
 <!-- Template for the user rating system -->
 
-<!-- script for displaying user's selected rating -->
+<!-- OLD script for displaying user's selected rating - do not use 
 <script>
     function function1(stars){
     
@@ -16,14 +16,17 @@
         }
     }
     
-    </script>
+    </script> -->
 
 <p style="display:inline"> Click to leave a rating: </p>
-<span class="fa fa-star" id= "demo1" onclick="function1(2)"></span>
-<span class="fa fa-star" id = "demo2" onclick="function1(3)"></span>
-<span class="fa fa-star" id = "demo3" onclick="function1(4)"></span>
-<span class="fa fa-star" id = "demo4" onclick="function1(5)"></span>
-<span class="fa fa-star" id = "demo5" onclick="function1(6)"></span> <br>
+<span class="fa fa-star rating-star" data-index ="1"></span>
+<span class="fa fa-star rating-star" data-index ="2"></span>
+<span class="fa fa-star rating-star" data-index ="3"></span>
+<span class="fa fa-star rating-star" data-index ="4"></span>
+<span class="fa fa-star rating-star" data-index ="5"></span> <br>
+
+<!-- <span class="fa fa-star rating-star" id = "demo5" onclick="function1(6)"></span> <br> -->
+
 
 <!-- TESTING PURPOSES - REMOVE AFTER DONE -->
 <h2 id="test"> </h2>
