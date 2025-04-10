@@ -15,8 +15,7 @@
         <h3> check here for information about your story ranking! </h3>
         <h4> your average ranking: <%= userAvgRating %> </h4>
         <% stories.forEach(story => { %>
-           
-            <!-- average rating of the story -->
+            <!-- average rating of each story -->
             <div class="avg-rating-container, row"> 
                 <div class="col-sm-2">
                 <p> <%= story.title %> </p>
@@ -29,9 +28,41 @@
                 <% }}else{ %>
                     <p display="inline"> no ratings yet </p>
                 <% } %>
-            </div>
+                </div>
+
+                <div class="col-sm-2">
+                    <button class="deletebutton"  data-story-id="<%= story._id %>"> delete </button>
+                </div>
             </div>
         <% }) %>
         </div>
     </body>
+
+     <!-- script to allow users to delete stories -->
+     <script>
+
+        // add event listener to every delete button
+        document.querySelectorAll(".deletebutton").forEach(button => {
+            button.addEventListener("click", sendDeleteRequest);
+          });
+
+        function sendDeleteRequest(){
+            console.log("delete button clicked")
+            const storyId = event.target.dataset.storyId;
+            // Send to server
+            fetch('/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: storyId}),
+            })
+            .then(res => res.json())
+            .then(data => {
+            console.log("Item deleted");
+            })
+            .catch(err => console.error("Error sending deletion request:", err));
+        }
+    </script>
+
 </html>

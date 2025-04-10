@@ -120,7 +120,7 @@ app.post('/rate', async (req, res) => {
         const { id, rating } = req.body;
         
         // get the new average rating
-        story = await collection.findOne({ _id: new ObjectId(id) }); // TODO: maybe use ID instead?
+        story = await collection.findOne({ _id: new ObjectId(id) });
         newTotal = story.totalrating + rating;
         newNum = story.numratings + 1;
         newRating = Math.round(newTotal / newNum);
@@ -136,6 +136,19 @@ app.post('/rate', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
     });
+
+// when a user presses "delete" on their post, query the database
+app.post('/delete', async(req,res) => {
+  try{
+    const {id} = req.body;
+    const deleteStory = await collection.deleteOne({ _id: new ObjectId(id) });
+    res.redirect('/');
+    res.json({ success: true, modified: deleteStory.deletedCount });
+  }catch (err) {
+    console.error("Error deleting story:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // sign up page
 app.get('/signup', function(req, res){
@@ -202,6 +215,7 @@ app.get('/logout', (req, res) => {
     }
   });
 });
+
 // profile page for logged in users
 app.get('/profile', async function(req,res){
   if(!req.session.loggedin){
