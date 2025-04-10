@@ -49,8 +49,10 @@
 <div class="container">
     <% if (stories.length > 0) { %>
     <% stories.forEach(story => { %>
-    
-    
+
+    <!-- only display private story if user is logged in -->
+    <% if (story.visibility == "private" && username || story.visibility == "public"){ %>
+
     <!-- display message if story is private -->
     <% if (story.visibility == "private"){ %>
         <div class="row"> <p> *private story </p></div>
@@ -85,6 +87,7 @@
 
     <br><br>
 
+    <%} %>
     <% }) %>
     <% } else { %>
       <p>No stories yet!</p>
