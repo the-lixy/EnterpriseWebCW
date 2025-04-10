@@ -141,9 +141,8 @@ app.post('/rate', async (req, res) => {
 app.post('/delete', async(req,res) => {
   try{
     const {id} = req.body;
-    const deleteStory = await collection.deleteOne({ _id: new ObjectId(id) });
+    await collection.deleteOne({ _id: new ObjectId(id) });
     res.redirect('/');
-    res.json({ success: true, modified: deleteStory.deletedCount });
   }catch (err) {
     console.error("Error deleting story:", err);
     res.status(500).json({ success: false, error: err.message });
