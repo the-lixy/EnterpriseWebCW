@@ -5,15 +5,43 @@
         </title>
         <%- include('../partials/imports'); %>
 
+        <!-- script for filtering by genre -->
+        <script>
+            function applyFilter(){
+                const genre = document.getElementById('filter-select').value;
+                let url = '/';
+                url = '/' + genre;
+                window.location.href = url;
+            };
+        </script>
 
     </head>
     <!-- partial - navbar header -->
     <header><%- include('../partials/header'); %></header>
-
     
     <!-- Template for displaying stories -->
     <div class="container">
     <h3><%= heading %></h3>
+
+    <!-- Form to filter by genre -->
+    <form method = 'GET' action = '/'>
+        <div class="form-group">
+            <label for="genre">Genre:</label>
+            <select class="form-control" id="genre-select" name="genre">
+                <option value="">All Stories</option>
+                <option>Adventure</option>
+                <option>Horror</option>
+                <option>Romance</option>
+                <option>Thriller</option>
+                <option>SciFi</option>
+                <option>Fantasy</option>
+                <option>Comedy</option>
+                <option>Fable</option>
+            </select>
+            <button type="submit"> Filter </button>
+        </div> 
+    </form>
+
     <div><%- include('../partials/story'); %></div>
     </div>
 </html>

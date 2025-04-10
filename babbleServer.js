@@ -77,19 +77,25 @@ app.get('/', async(req, res) => {
         console.error(err);
         res.status(500).send('Error loading homepage');
       }
-    });
-*/
+    }); */
 
 // home page (filterable by genre)
-app.get('/', async(req, res) => {
-  let filterOption = {};
-  
-  // Filtering logic
-  const filter = req.query.filter;
-  if (filter === 'public') {
-    filterOption.genre = 'public';
-  } else if (filter === 'private') {
-    filterOption.visibility = 'private';
+app.get('/', async (req, res) => {
+  const genre = req.query.genre; // from ?genre=...
+  const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable'];
+  const filterOption = {};
+
+  if (genre && validGenres.includes(genre)) {
+    filterOption.genre = genre;
+  }
+
+  try {
+    const heading = genre ? `${genre} Stories` : "Popular Stories";
+    const stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
+    res.render('pages/homepage', { heading, stories });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading homepage');
   }
 });
 
