@@ -66,13 +66,6 @@ app.use((req, res, next) => {
 
 // home page
 app.get('/', async(req, res) => {
-  // temp code to test login feature!!
-/*
-  if(!req.session.loggedin){
-    res.redirect('/login');
-    return;
-  }
-*/
     try {
         const stories = await collection.find({}).toArray(); // get all stories as an array
         res.render('pages/homepage', { stories });
@@ -185,9 +178,15 @@ app.post('/login', async (req,res) => {
   });
 
 // profile page for logged in users
-app.get('/profile', function(req,res){
-  res.render('pages/profile')
-});
+app.get('/profile', async function(req,res){
+  try {
+    const stories = await collection.find({author: req.session.username}).toArray(); // get all stories as an array
+    res.render('pages/profile', { stories });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading profile');
+  }
+});  
 
 
 app.listen(8080);
