@@ -84,7 +84,7 @@ app.post('/submittedstory', function(req, res){
         title: req.body.title,
         story: req.body.story,
         genre: req.body.genre,
-        author: "Anonymous", // I want to change this later!
+        author: "Anonymous", //TODO: allow logged in users to post under their username
         totalrating: 0,
         numratings: 0,
         rating: 0, // the average rating
@@ -104,7 +104,7 @@ app.post('/rate', async (req, res) => {
         const { title, rating } = req.body;
         
         // get the new average rating
-        story = await collection.findOne({ title: req.body.title }); // maybe use ID instead?
+        story = await collection.findOne({ title: req.body.title }); // TODO: maybe use ID instead?
         newTotal = story.totalrating + rating;
         newNum = story.numratings + 1;
         newRating = Math.round(newTotal / newNum);
@@ -121,6 +121,29 @@ app.post('/rate', async (req, res) => {
     }
     });
 
+// sign up page
+app.get('/signup', function(req, res){
+    res.render('pages/signup');
+});
+
+app.post('/signup', async (req, res) => {
+    hashedPassword = await bcrypt.hash(req.body.password, 10);
+      newUser = {
+        username: req.body.username,
+        password: hashedPassword,
+      };
+
+    existing = await User.findOne({ username: newUser.username });
+    
+    if(existing){
+        res.send("Username taken.")
+
+    } else {
+        await User.insertOne(newUser);
+        res.redirect('/login');
+    }
+  });
+
 // login page
 app.get('/login', function(req, res){
     res.render('pages/login');
@@ -130,7 +153,7 @@ app.post('/login', async (req,res) => {
     const user = await User.findOne({ username: req.body.username });
     if (user && await bcrypt.compare(req.body.password, user.password)) {
       req.session.userId = user._id;
-      res.redirect('/dashboard');
+      res.redirect('/');
     } else {
       res.send("Invalid login");
     }
