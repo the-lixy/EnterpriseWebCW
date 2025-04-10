@@ -77,6 +77,13 @@
             <% } %>
         </div>
 
+        <!-- number of ratings the story has recieved -->
+        <% if (story.rating > 0){ %>
+                <div class="col-sm-1">
+                    <p> <%= story.numratings %> ratings </p>
+                </div>
+        <% } %>
+
     </div>
     <p> <%= story.story %> </p>
 

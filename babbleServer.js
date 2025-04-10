@@ -66,11 +66,12 @@ app.use((req, res, next) => {
   next();
   });
 
-// home page
+// home page (popular stories)
 app.get('/', async(req, res) => {
     try {
-        stories = await collection.find({}).toArray(); // get all stories as an array
-        res.render('pages/homepage', { stories });
+        heading = "Popular Stories";
+        stories = await collection.find({}).sort({ rating: -1, numratings: -1 }).toArray(); // get all stories as an array sorted by highest rating and most ratings
+        res.render('pages/homepage', { heading, stories });
       } catch (err) {
         console.error(err);
         res.status(500).send('Error loading homepage');
