@@ -179,17 +179,29 @@ app.get('/login', function(req, res){
 });
 
 app.post('/login', async (req,res) => {
-    const user = await User.findOne({ username: req.body.username });
-    if (user && await bcrypt.compare(req.body.password, user.password)) {
-      req.session.userId = user._id;
-      req.session.username = user.username;
-      req.session.loggedin = true;
-      res.redirect('/');
+  const user = await User.findOne({ username: req.body.username });
+  if (user && await bcrypt.compare(req.body.password, user.password)) {
+    req.session.userId = user._id;
+    req.session.username = user.username;
+    req.session.loggedin = true;
+    res.redirect('/');
+  } else {
+    res.send("Username or password is incorrect.");
+  }
+});
+
+ // log out feature
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      res.status(500).send("Logout failed.");
     } else {
-      res.send("Username or password is incorrect.");
+      // Force reload to reset navbar state
+      res.redirect('/');
     }
   });
-
+});
 // profile page for logged in users
 app.get('/profile', async function(req,res){
   if(!req.session.loggedin){
@@ -198,7 +210,6 @@ app.get('/profile', async function(req,res){
   }else{
     try {
       stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
-      console.log(stories);
 
       //TODO: calculate this ONCE when a story is rated in /rate
       // calculate user's overall average rating
