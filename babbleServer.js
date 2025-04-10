@@ -66,6 +66,7 @@ app.use((req, res, next) => {
   next();
   });
 
+  /*
 // home page (popular stories)
 app.get('/', async(req, res) => {
     try {
@@ -77,6 +78,20 @@ app.get('/', async(req, res) => {
         res.status(500).send('Error loading homepage');
       }
     });
+*/
+
+// home page (filterable by genre)
+app.get('/', async(req, res) => {
+  let filterOption = {};
+  
+  // Filtering logic
+  const filter = req.query.filter;
+  if (filter === 'public') {
+    filterOption.genre = 'public';
+  } else if (filter === 'private') {
+    filterOption.visibility = 'private';
+  }
+});
 
 // submit page
 app.get('/submit', function(req, res){
