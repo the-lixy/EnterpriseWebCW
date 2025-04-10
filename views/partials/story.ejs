@@ -49,6 +49,14 @@
 <div class="container">
     <% if (stories.length > 0) { %>
     <% stories.forEach(story => { %>
+    
+    
+    <!-- display message if story is private -->
+    <% if (story.visibility == "private"){ %>
+        <div class="row"> <p> *private story </p></div>
+    <%} %>
+
+
     <h4 style="display:inline"> <%= story.title %> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">

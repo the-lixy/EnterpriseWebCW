@@ -67,12 +67,12 @@ app.use((req, res, next) => {
 // home page
 app.get('/', async(req, res) => {
   // temp code to test login feature!!
-
+/*
   if(!req.session.loggedin){
     res.redirect('/login');
     return;
   }
-
+*/
     try {
         const stories = await collection.find({}).toArray(); // get all stories as an array
         res.render('pages/homepage', { stories });
@@ -153,14 +153,15 @@ app.post('/signup', async (req, res) => {
         username: req.body.username,
         password: hashedPassword,
       };
-    
+
     // find out if username already exists
     existing = await User.findOne({ username: newUser.username });
     if(existing){
         res.send("Username taken.")
-
     // add user to database
-    } else {
+    } else if(newUser.username.toUpperCase() == "ANONYMOUS"){
+      res.send('Invalid username.')
+    }else {
         await User.insertOne(newUser);
         res.redirect('/login');
     }
