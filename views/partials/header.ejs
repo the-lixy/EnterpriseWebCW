@@ -11,6 +11,8 @@
         <li class="<%= path === '/submit' ? 'active' : '' %>">
           <a href="/submit">Submit a Story</a>
         </li>
+
+        <!-- options for users not logged in -->
         <% if (!username) {%>
           <li class="<%= path === '/login' ? 'active' : '' %>">
             <a href="/login">Login</a>
@@ -19,9 +21,14 @@
             <a href="/signup">Sign Up</a>
           </li>
         <%} %>
+
+        <!-- options for logged in users -->
         <% if (username) {%>
           <li class="<%= path === '/profile' ? 'active' : '' %>">
             <a href="/profile">Profile</a>
+          </li>
+          <li class="<%= path === '/logout' ? 'active' : '' %>">
+            <a href="/logout">Log Out</a>
           </li>
         <%} %>
       </ul>

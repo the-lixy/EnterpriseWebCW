@@ -139,7 +139,13 @@ app.post('/rate', async (req, res) => {
 
 // sign up page
 app.get('/signup', function(req, res){
-    res.render('pages/signup');
+    if(req.session.loggedin){
+      res.redirect('/');
+      return;
+    }else{
+      res.render('pages/signup');
+    }
+    
 });
 
 app.post('/signup', async (req, res) => {
@@ -164,7 +170,12 @@ app.post('/signup', async (req, res) => {
 
 // login page
 app.get('/login', function(req, res){
+  if(req.session.loggedin){
+    res.redirect('/');
+    return;
+  }else{
     res.render('pages/login');
+  }
 });
 
 app.post('/login', async (req,res) => {
@@ -181,24 +192,36 @@ app.post('/login', async (req,res) => {
 
 // profile page for logged in users
 app.get('/profile', async function(req,res){
-  try {
-    stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
-    console.log(stories);
+  if(!req.session.loggedin){
+    res.redirect('/');
+    return;
+  }else{
+    try {
+      stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
+      console.log(stories);
 
-    //TODO: calculate this ONCE when a story is rated in /rate
-    // calculate user's overall average rating
-    // total up the rating of each story
-    userTotalRating = 0;
-    
-    for (let i = 0; i < stories.length; i++) {
-      userTotalRating += stories[i].rating;
+      //TODO: calculate this ONCE when a story is rated in /rate
+      // calculate user's overall average rating
+      // total up the rating of each story
+      userTotalRating = 0;
+
+      if(stories.length == 0){
+        console.log("no stories found")
+        userAvgRating = 0;
+      }else{
+        for (let i = 0; i < stories.length; i++) {
+          userTotalRating += stories[i].rating;
+        }
+        userAvgRating = Math.round(userTotalRating/stories.length);
+      }
+      
+
+
+      res.render('pages/profile', { stories, userAvgRating });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error loading profile');
     }
-    userAvgRating = Math.round(userTotalRating/stories.length);
-
-    res.render('pages/profile', { stories, userAvgRating });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading profile');
   }
 });  
 

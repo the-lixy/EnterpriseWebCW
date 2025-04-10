@@ -15,15 +15,21 @@
         <h3> check here for information about your story ranking! </h3>
         <h4> your average ranking: <%= userAvgRating %> </h4>
         <% stories.forEach(story => { %>
-           <p> <%= story.title %> </p>
+           
             <!-- average rating of the story -->
-            <div class="avg-rating-container, col-sm-2"> 
+            <div class="avg-rating-container, row"> 
+                <div class="col-sm-2">
+                <p> <%= story.title %> </p>
+                </div>
+
+                <div class="col-sm-2">
                 <% if (story.rating > 0){ %>
                 <% for (let i = 1; i <= 5; i++) { %>
                     <span class="fa fa-star <%= i <= story.rating ? 'checked' : '' %>"></span>
                 <% }}else{ %>
                     <p display="inline"> no ratings yet </p>
                 <% } %>
+            </div>
             </div>
         <% }) %>
         </div>
