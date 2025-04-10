@@ -29,6 +29,7 @@ let db;
 let collection;
 let User;
 
+
 // session for keeping users logged in
 app.use(session({
     secret: 'secretkey', // use env var in prod
@@ -63,6 +64,13 @@ app.use((req, res, next) => {
 
 // home page
 app.get('/', async(req, res) => {
+  // temp code to test login feature!!
+
+  if(!req.session.loggedin){
+    res.redirect('/login');
+    return;
+  }
+
     try {
         //const story = await collection.findOne(); // get story
         const stories = await collection.find({}).toArray(); // get all stories as an array
@@ -75,7 +83,7 @@ app.get('/', async(req, res) => {
 
 // submit page
 app.get('/submit', function(req, res){
-    res.render('pages/submit');
+    res.render('pages/submit', { username: req.session.userId ? req.session.username : null });
 });
 
 // when story is submitted, send it to database
@@ -132,17 +140,18 @@ app.post('/signup', async (req, res) => {
         username: req.body.username,
         password: hashedPassword,
       };
-
-    existing = await User.findOne({ username: newUser.username });
     
+    // find out if username already exists
+    existing = await User.findOne({ username: newUser.username });
     if(existing){
         res.send("Username taken.")
 
+    // add user to database
     } else {
         await User.insertOne(newUser);
         res.redirect('/login');
     }
-  });
+    });
 
 // login page
 app.get('/login', function(req, res){
@@ -153,9 +162,11 @@ app.post('/login', async (req,res) => {
     const user = await User.findOne({ username: req.body.username });
     if (user && await bcrypt.compare(req.body.password, user.password)) {
       req.session.userId = user._id;
+      req.session.username = user.username;
+      req.session.loggedin = true;
       res.redirect('/');
     } else {
-      res.send("Invalid login");
+      res.send("Username or password is incorrect.");
     }
   });
 
