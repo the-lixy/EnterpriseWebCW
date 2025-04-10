@@ -36,8 +36,22 @@
                     </select>
                 </div> 
 
+                <!-- option to submit anonymously if user is logged in-->
+                <% if (username) {%>
+                    <label>
+                        <input type="checkbox" name="anonymous" checked>
+                        Submit anonymously
+                      </label>
+                <%} %>
+
+                <!-- display message if user is not logged in -->
+                <% if (!username) { %>
+
+                    <p> you are not logged in. work will be submitted anonymously. </p>
+
+                <% } %>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-default">Submit Anonymously</button>
+                    <button type="submit" class="btn btn-default">Submit</button>
                 </div>
 
             </form>
