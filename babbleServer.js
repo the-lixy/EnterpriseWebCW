@@ -252,7 +252,7 @@ app.get('/profile', async function(req,res){
       userTotalRating = 0;
 
       if(stories.length == 0){
-        console.log("no stories found")
+        //console.log("no stories found")
         userAvgRating = 0;
       }else{
         for (let i = 0; i < stories.length; i++) {
