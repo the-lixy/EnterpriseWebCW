@@ -19,6 +19,11 @@
             <a href="/signup">Sign Up</a>
           </li>
         <%} %>
+        <% if (username) {%>
+          <li class="<%= path === '/profile' ? 'active' : '' %>">
+            <a href="/profile">Profile</a>
+          </li>
+        <%} %>
       </ul>
     </div>
   </nav>
