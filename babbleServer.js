@@ -185,6 +185,7 @@ app.get('/profile', async function(req,res){
     stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
     console.log(stories);
 
+    //TODO: calculate this ONCE when a story is rated in /rate
     // calculate user's overall average rating
     // total up the rating of each story
     userTotalRating = 0;
@@ -192,7 +193,7 @@ app.get('/profile', async function(req,res){
     for (let i = 0; i < stories.length; i++) {
       userTotalRating += stories[i].rating;
     }
-    userAvgRating = userTotalRating/stories.length;
+    userAvgRating = Math.round(userTotalRating/stories.length);
 
     res.render('pages/profile', { stories, userAvgRating });
   } catch (err) {
