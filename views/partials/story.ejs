@@ -25,7 +25,7 @@
                 
                 // Add rating to database
                 const newRating = index;
-                const storyTitle = container.dataset.storyTitle; // Get story title from data attribute
+                const storyId = container.dataset.storyId; // Get story title from data attribute
 
                 // Send to server
                 fetch('/rate', {
@@ -33,7 +33,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ title: storyTitle, rating: newRating }),
+                body: JSON.stringify({ id: storyId, rating: newRating }),
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -80,7 +80,7 @@
     </div>
     <p> <%= story.story %> </p>
 
-    <div class="rating-container" data-story-title="<%= story.title %>">
+    <div class="rating-container" data-story-id="<%= story._id %>">
         <p style="display:inline"> Click to leave a rating: </p>
         <%- include('../partials/rating'); %>
     </div>

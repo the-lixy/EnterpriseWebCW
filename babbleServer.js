@@ -7,6 +7,8 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var session = require('express-session');
 
+const { ObjectId } = require('mongodb');
+
 //for using post in forums
 app.use(express.urlencoded({extended:true}))
 
@@ -115,16 +117,16 @@ app.post('/submittedstory', function(req, res){
 // when a story is rated, submit rating to database
 app.post('/rate', async (req, res) => {
     try {
-        const { title, rating } = req.body;
+        const { id, rating } = req.body;
         
         // get the new average rating
-        story = await collection.findOne({ title: req.body.title }); // TODO: maybe use ID instead?
+        story = await collection.findOne({ _id: new ObjectId(id) }); // TODO: maybe use ID instead?
         newTotal = story.totalrating + rating;
         newNum = story.numratings + 1;
         newRating = Math.round(newTotal / newNum);
 
         // add the rating to the total number of ratings and increment the number of ratings by 1
-        const result = await collection.updateOne({ title },
+        const result = await collection.updateOne({ _id: new ObjectId(id) },
         { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)}, $set: {rating: newRating} },
         );
 
@@ -182,7 +184,17 @@ app.get('/profile', async function(req,res){
   try {
     stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
     console.log(stories);
-    res.render('pages/profile', { stories });
+
+    // calculate user's overall average rating
+    // total up the rating of each story
+    userTotalRating = 0;
+    
+    for (let i = 0; i < stories.length; i++) {
+      userTotalRating += stories[i].rating;
+    }
+    userAvgRating = userTotalRating/stories.length;
+
+    res.render('pages/profile', { stories, userAvgRating });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading profile');
