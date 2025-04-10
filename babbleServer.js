@@ -142,7 +142,7 @@ app.post('/delete', async(req,res) => {
   try{
     const {id} = req.body;
     await collection.deleteOne({ _id: new ObjectId(id) });
-    res.redirect('/');
+    //res.redirect('/');
   }catch (err) {
     console.error("Error deleting story:", err);
     res.status(500).json({ success: false, error: err.message });

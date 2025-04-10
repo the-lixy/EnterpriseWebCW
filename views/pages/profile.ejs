@@ -57,11 +57,14 @@
             },
             body: JSON.stringify({ id: storyId}),
             })
+            /*
             .then(res => res.json())
             .then(data => {
             console.log("Item deleted");
-            })
+            window.location.reload();
+            }) */
             .catch(err => console.error("Error sending deletion request:", err));
+            window.location.reload();
         }
     </script>
 
