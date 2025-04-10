@@ -96,7 +96,7 @@ app.post('/submittedstory', function(req, res){
     : "Anonymous";
 
   // decide if story is public or private
-    visibility = req.session.userId && !req.body.private
+    visibility = !req.body.private
     ? "public"
     : "private";
 
