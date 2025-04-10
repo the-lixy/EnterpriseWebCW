@@ -37,12 +37,14 @@
                 </div> 
 
                 <!-- option to submit anonymously if user is logged in-->
-                <% if (username) {%>
-                    <label>
-                        <input type="checkbox" name="anonymous" checked>
-                        Submit anonymously
-                      </label>
-                <%} %>
+                <div class="form-group">
+                    <% if (username) {%>
+                        <label>
+                            <input type="checkbox" name="anonymous">
+                            Submit anonymously
+                        </label>
+                    <%} %>
+                </div>
 
                 <!-- display message if user is not logged in -->
                 <% if (!username) { %>

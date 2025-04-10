@@ -58,8 +58,10 @@ function checkAuth(req, res, next) {
 
 // get current path for navbar template rendering
 app.use((req, res, next) => {
-    res.locals.path = req.path;
-    next();
+  // allow all templates to access username
+  res.locals.username = req.session.username;
+  res.locals.path = req.path;
+  next();
   });
 
 // home page
@@ -72,7 +74,6 @@ app.get('/', async(req, res) => {
   }
 
     try {
-        //const story = await collection.findOne(); // get story
         const stories = await collection.find({}).toArray(); // get all stories as an array
         res.render('pages/homepage', { stories });
       } catch (err) {
@@ -83,19 +84,25 @@ app.get('/', async(req, res) => {
 
 // submit page
 app.get('/submit', function(req, res){
-    res.render('pages/submit', { username: req.session.userId ? req.session.username : null });
+    res.render('pages/submit');
 });
 
 // when story is submitted, send it to database
 app.post('/submittedstory', function(req, res){
+
+  // decide if story is posted under username or anonymously
+    author = req.session.userId && !req.body.anonymous
+    ? req.session.username
+    : "Anonymous";
+
     const newstory = {
         title: req.body.title,
         story: req.body.story,
         genre: req.body.genre,
-        author: "Anonymous", //TODO: allow logged in users to post under their username
+        author: author,
         totalrating: 0,
         numratings: 0,
-        rating: 0, // the average rating
+        rating: 0, // this is the average rating
     };
     
     db.collection('stories').insertOne(newstory, function(err, result) {

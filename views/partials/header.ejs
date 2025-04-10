@@ -11,12 +11,14 @@
         <li class="<%= path === '/submit' ? 'active' : '' %>">
           <a href="/submit">Submit a Story</a>
         </li>
-        <li class="<%= path === '/login' ? 'active' : '' %>">
-          <a href="/login">Login</a>
-        </li>
-        <li class="<%= path === '/signup' ? 'active' : '' %>">
-          <a href="/signup">Sign Up</a>
-        </li>
+        <% if (!username) {%>
+          <li class="<%= path === '/login' ? 'active' : '' %>">
+            <a href="/login">Login</a>
+          </li>
+          <li class="<%= path === '/signup' ? 'active' : '' %>">
+            <a href="/signup">Sign Up</a>
+          </li>
+        <%} %>
       </ul>
     </div>
   </nav>
