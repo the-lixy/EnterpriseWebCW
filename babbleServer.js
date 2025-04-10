@@ -95,6 +95,11 @@ app.post('/submittedstory', function(req, res){
     ? req.session.username
     : "Anonymous";
 
+  // decide if story is public or private
+    visibility = req.session.userId && !req.body.private
+    ? "public"
+    : "private";
+
     const newstory = {
         title: req.body.title,
         story: req.body.story,
@@ -103,6 +108,7 @@ app.post('/submittedstory', function(req, res){
         totalrating: 0,
         numratings: 0,
         rating: 0, // this is the average rating
+        visibility: visibility, // story can be public or private
     };
     
     db.collection('stories').insertOne(newstory, function(err, result) {
@@ -176,6 +182,12 @@ app.post('/login', async (req,res) => {
       res.send("Username or password is incorrect.");
     }
   });
+
+// profile page for logged in users
+app.get('/profile', function(req,res){
+  res.render('pages/profile')
+});
+
 
 app.listen(8080);
 console.log("listening on port 8080");

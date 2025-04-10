@@ -46,6 +46,16 @@
                     <%} %>
                 </div>
 
+                <!-- option to submit private story (viewable only when logged in) if user is logged in-->
+                <div class="form-group">
+                    <% if (username) {%>
+                        <label>
+                            <input type="checkbox" name="private">
+                            Private story (visible only to logged in users)
+                        </label>
+                    <%} %>
+                </div>
+
                 <!-- display message if user is not logged in -->
                 <% if (!username) { %>
 
