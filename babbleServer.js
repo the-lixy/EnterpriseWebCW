@@ -67,7 +67,7 @@ app.use((req, res, next) => {
 // home page
 app.get('/', async(req, res) => {
     try {
-        const stories = await collection.find({}).toArray(); // get all stories as an array
+        stories = await collection.find({}).toArray(); // get all stories as an array
         res.render('pages/homepage', { stories });
       } catch (err) {
         console.error(err);
@@ -180,7 +180,8 @@ app.post('/login', async (req,res) => {
 // profile page for logged in users
 app.get('/profile', async function(req,res){
   try {
-    const stories = await collection.find({author: req.session.username}).toArray(); // get all stories as an array
+    stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
+    console.log(stories);
     res.render('pages/profile', { stories });
   } catch (err) {
     console.error(err);

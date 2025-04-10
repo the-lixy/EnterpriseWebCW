@@ -11,6 +11,12 @@
     <header><%- include('../partials/header'); %></header>
 
     <body>
+        <div class="container">
         <h3> check here for information about your story ranking! </h3>
+        <h4> your average ranking: </h4>
+        <% stories.forEach(story => { %>
+           <p> <%= story.title %> </p>
+        <% }) %>
+        </div>
     </body>
 </html>
