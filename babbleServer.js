@@ -82,7 +82,7 @@ app.get('/', async(req, res) => {
 // home page (filterable by genre)
 app.get('/', async (req, res) => {
   const genre = req.query.genre; // from ?genre=...
-  const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable'];
+  const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
   const filterOption = {};
 
   if (genre && validGenres.includes(genre)) {
