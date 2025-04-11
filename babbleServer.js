@@ -16,10 +16,14 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json());
 
 // load environment variables
-require('dotenv').config(); // Load variables from .env
+require('dotenv').config();
 
 // using ejs for templating
 app.set('view engine', 'ejs');
+
+// cookie parser for saving users' viewed stories in a cookie
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 // MongoDB setup
 const { MongoClient } = require('mongodb');

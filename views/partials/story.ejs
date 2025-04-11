@@ -1,6 +1,6 @@
 <!-- Template for displaying stories -->
 
-<!-- script for allowing user to rate individual stories -->
+<!-- script for allowing user to rate stories -->
  <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Select every rating container on the page
@@ -47,11 +47,6 @@
  </script>
 
 <div class="container">
-    <% if (stories.length > 0) { %>
-    <% stories.forEach(story => { %>
-
-    <!-- only display private story if user is logged in -->
-    <% if (story.visibility == "private" && username || story.visibility == "public"){ %>
 
     <!-- display message if story is private -->
     <% if (story.visibility == "private"){ %>
@@ -93,11 +88,4 @@
     </div>
 
     <br><br>
-
-    <%} %>
-    <% }) %>
-    <% } else { %>
-      <p>No stories yet!</p>
-    <% } %>
-
 </div>
