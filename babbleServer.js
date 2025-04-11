@@ -99,6 +99,19 @@ app.get('/', async (req, res) => {
   }
 });
 
+// story page
+app.get('/story', async(req,res) => {
+  const storyId = req.query.id;
+  try {
+    const story = await collection.findOne({ _id: new ObjectId(storyId) });
+    res.render('pages/storypage', { story });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading story');
+  }
+});
+
+
 // submit page
 app.get('/submit', function(req, res){
     res.render('pages/submit');

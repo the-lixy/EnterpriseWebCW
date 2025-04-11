@@ -59,7 +59,7 @@
     <%} %>
 
 
-    <h4 style="display:inline"> <%= story.title %> </h4> <p style="display:inline"> by <%=story.author %> </p>
+    <h4 style="display:inline"> <a href="/story?id=<%= story._id %>"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
 
@@ -85,10 +85,10 @@
         <% } %>
 
     </div>
+
     <!-- define how many characters of the story should be previewed -->
     <% num = 100 %>
     <p><%= story.story.length > num ? story.story.slice(0, num).split(" ").slice(0, -1).join(" ") + '...' : story.story %></p>
-    <!--  <p> <%= story.story %> </p> -->
 
     <div class="rating-container" data-story-id="<%= story._id %>">
         <p style="display:inline"> Click to leave a rating: </p>
