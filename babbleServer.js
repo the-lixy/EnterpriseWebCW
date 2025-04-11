@@ -95,9 +95,9 @@ app.get('/', async (req, res) => {
 
   try {
     const heading = genre ? `${genre} Stories` : "Popular Stories";
-    const stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
+    let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
 
-    
+
     // Check the "seenStories" cookie for non-logged-in users
     const seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
 

@@ -49,47 +49,45 @@
  <!-- script to mark stories as seen -->
  <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // get current cookie value
-      function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-      }
-  
-      // set cookie
-      function setCookie(name, value, days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));  // Set expiry
-        const expires = `expires=${date.toUTCString()}`;
-        document.cookie = `${name}=${value}; ${expires}; path=/`;
-      }
-
-      
-  
-      // mark story as seen
-      function markAsSeen(storyId) {
-        let seenStories = getCookie('seenStories');
-        if (seenStories) {
-          seenStories = JSON.parse(seenStories); // Parse existing cookie
-        } else {
-          seenStories = []; // Initialize empty array if cookie doesn't exist
+        // get current cookie
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
         }
-  
-        if (!seenStories.includes(storyId)) {
-          seenStories.push(storyId); // Add story ID if not already seen
-          setCookie('seenStories', JSON.stringify(seenStories), 7); // Store the updated list in a cookie for 7 days
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = `expires=${date.toUTCString()}`;
+            document.cookie = `${name}=${value}; ${expires}; path=/`;
         }
-      }
 
-      function testFunc(storyId){
-        console.log("it works!");
-        console.log(storyId);
-      }
+        function markAsSeen(storyId) {
+            let seenStories = getCookie('seenStories');
+            seenStories = seenStories ? JSON.parse(seenStories) : [];
 
-      document.getElementById("storyLink").addEventListener("click", testFunc); 
+            if (!seenStories.includes(storyId)) {
+            seenStories.push(storyId);
+            setCookie('seenStories', JSON.stringify(seenStories), 7);
+            }
+        }
+
+        function testFunc(event) {
+            const storyId = event.currentTarget.getAttribute('data-id');
+            console.log("it works!");
+            console.log("Clicked storyId:", storyId);
+
+            markAsSeen(storyId);
+        }
+
+        // Attach the handler to all story links
+        document.querySelectorAll('.storyLink').forEach(link => {
+            link.addEventListener('click', testFunc);
+        });
     });
-  </script>
+</script>
 
 <div class="container">
     <% if (stories.length > 0) { %>
@@ -104,7 +102,7 @@
     <%} %>
 
 
-    <h4 style="display:inline"> <a href="/story?id=<%= story._id %>" class = "storyLink" onClick="testFunc('<% story._id %>')"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
+    <h4 style="display:inline"> <a href="/story?id=<%= story._id %>" class = "storyLink" data-id="<%= story._id %>" onClick="testFunc('<% story._id %>')"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
 
