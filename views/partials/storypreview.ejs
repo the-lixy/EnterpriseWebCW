@@ -104,7 +104,7 @@
     <%} %>
 
 
-    <h4 style="display:inline"> <a href="/story?id=<%= story._id %>" id = "storyLink" onClick="testFunc('<% story._id %>')"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
+    <h4 style="display:inline"> <a href="/story?id=<%= story._id %>" class = "storyLink" onClick="testFunc('<% story._id %>')"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
 

@@ -96,6 +96,13 @@ app.get('/', async (req, res) => {
   try {
     const heading = genre ? `${genre} Stories` : "Popular Stories";
     const stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
+
+    
+    // Check the "seenStories" cookie for non-logged-in users
+    const seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+
+    // Filter out stories that the user has already seen
+    stories = stories.filter(story => !seenStories.includes(story._id.toString()));
     res.render('pages/homepage', { heading, stories });
   } catch (err) {
     console.error(err);
