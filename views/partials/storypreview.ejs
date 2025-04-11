@@ -1,0 +1,106 @@
+<!-- Template for displaying information about stories for the home page -->
+
+<!-- script for allowing user to rate individual stories -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select every rating container on the page
+        const ratingContainers = document.querySelectorAll('.rating-container');
+    
+        ratingContainers.forEach(container => {
+        const stars = container.querySelectorAll('.rating-star');
+    
+          stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const index = parseInt(star.dataset.index);
+
+                // Remove 'checked' from all stars in this container
+                stars.forEach(s => s.classList.remove('checked'));
+
+                // Add 'checked' up to the clicked star
+                for (let i = 0; i < index; i++) {
+                stars[i].classList.add('checked');
+                }
+
+                //console.log("Rated:", index);
+                
+                // Add rating to database
+                const newRating = index;
+                const storyId = container.dataset.storyId; // Get story id from data attribute
+
+                // Send to server
+                fetch('/rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: storyId, rating: newRating }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                //console.log("Rating saved:", data);
+                })
+                .catch(err => console.error("Error saving rating:", err));
+            });
+          });
+        });
+      });
+ </script>
+
+<div class="container">
+    <% if (stories.length > 0) { %>
+    <% stories.forEach(story => { %>
+
+    <!-- only display private story if user is logged in -->
+    <% if (story.visibility == "private" && username || story.visibility == "public"){ %>
+
+    <!-- display message if story is private -->
+    <% if (story.visibility == "private"){ %>
+        <div class="row"> <p> *private story </p></div>
+    <%} %>
+
+
+    <h4 style="display:inline"> <%= story.title %> </h4> <p style="display:inline"> by <%=story.author %> </p>
+    <!-- genre & rating boxes -->
+    <div class="row">
+
+        <div class="col-sm-1"> 
+            <p> <%= story.genre %> </p>
+        </div>
+
+        <!-- average rating of the story -->
+        <div class="avg-rating-container, col-sm-2"> 
+            <% if (story.rating > 0){ %>
+            <% for (let i = 1; i <= 5; i++) { %>
+                <span class="fa fa-star <%= i <= story.rating ? 'checked' : '' %>"></span>
+            <% }}else{ %>
+                <p display="inline"> no ratings yet </p>
+            <% } %>
+        </div>
+
+        <!-- number of ratings the story has recieved -->
+        <% if (story.rating > 0){ %>
+                <div class="col-sm-1">
+                    <p> <%= story.numratings %> ratings </p>
+                </div>
+        <% } %>
+
+    </div>
+    <!-- define how many characters of the story should be previewed -->
+    <% num = 100 %>
+    <p><%= story.story.length > num ? story.story.slice(0, num).split(" ").slice(0, -1).join(" ") + '...' : story.story %></p>
+    <!--  <p> <%= story.story %> </p> -->
+
+    <div class="rating-container" data-story-id="<%= story._id %>">
+        <p style="display:inline"> Click to leave a rating: </p>
+        <%- include('../partials/rating'); %>
+    </div>
+
+    <br><br>
+
+    <%} %>
+    <% }) %>
+    <% } else { %>
+      <p>No stories yet!</p>
+    <% } %>
+
+</div>
