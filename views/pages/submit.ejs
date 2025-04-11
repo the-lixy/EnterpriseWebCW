@@ -1,12 +1,47 @@
 <html lang="en">
-    <head>
-        <title> Babbler - Submit a Story </title>
-        <%- include('../partials/imports'); %>
-    </head>
+
+<head>
+    <style>
+        .maxed-out {
+          color: red;
+          font-weight: bold;
+        }
+      </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('storyText');
+        const counter = document.getElementById('wordCounter');
+        const maxWords = 500;
+    
+        input.addEventListener('input', () => {
+            const text = input.value.trim();
+            const words = text.split(/\s+/).filter(Boolean); // Removes empty strings
+            const wordCount = words.length;
+    
+            // Update counter text
+            counter.textContent = `${wordCount} / ${maxWords} words`;
+            if (wordCount >= maxWords) {
+            counter.classList.add('maxed-out');
+            } else {
+            counter.classList.remove('maxed-out');
+            }
+    
+            // If word count exceeds max, trim the input
+            if (wordCount > maxWords) {
+            const trimmed = words.slice(0, maxWords).join(" ");
+            input.value = trimmed;
+            counter.textContent = `${maxWords} / ${maxWords} words`;
+            }
+        });
+    });
+    </script>
+
+    <title> Babbler - Submit a Story </title>
+    <%- include('../partials/imports'); %>
 
     <!-- partial - navbar header -->
     <header><%- include('../partials/header'); %></header>
-    
+</head>
     <body>
         <div class="container">
             <h4> Submit a Story</h4>
@@ -14,13 +49,15 @@
 
                 <div class="form-group">
                     <label for="title">Title:</label>
-                    <input type="text" class="form-control" placeholder="Enter title" name="title" required>
+                    <input type="text" class="form-control" placeholder="Enter title" name="title" maxlength = "30" required>
                 </div>
 
                 <div class="form-group">
                     <label for="story">Story Text:</label>
-                    <textarea class="form-control" rows="5" placeholder="Enter story here" name="story" required> </textarea>
+                    <textarea class="form-control" rows="5" placeholder="Enter story here" name="story" maxlength = "3000" id="storyText" required> </textarea>
+                    <small id="wordCounter">0 / 500 words</small>
                 </div>
+
 
                 <div class="form-group">
                     <label for="genre">Genre:</label>
