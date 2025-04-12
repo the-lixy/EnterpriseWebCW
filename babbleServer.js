@@ -165,10 +165,9 @@ app.post('/submittedstory', function(req, res){
     
     db.collection('stories').insertOne(newstory, function(err, result) {
         if (err) throw err;
-        console.log('saved to database')
-        res.redirect('/')
+        //console.log('saved to database')
         })
-    res.render('pages/submittedstory');
+    res.render('pages/submittedstory', { newstory });
 });
 
 // when a story is rated, submit rating to database

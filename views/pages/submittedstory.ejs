@@ -10,5 +10,14 @@
     <!-- partial - navbar header -->
     <header><%- include('../partials/header'); %></header>
 
-    <div class="container"> <p> Thanks for submitting!</p> </div>
-    
+    <body>
+        <div class="container"> <p> Thanks for submitting!</p>
+
+        <!-- display message if story was posted anonymously -->
+        <% if (newstory.author === "Anonymous" || !req.session.userId ){ %>
+            <h3> it works! </h3>
+        <%} %>
+    </div>
+        
+    </body>
+</html>
