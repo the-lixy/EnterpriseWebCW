@@ -200,7 +200,7 @@ app.post('/rate', async (req, res) => {
 
         
         newRating = Math.round(newTotal / newNum);
-        //console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
+        console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
 
         /*
         
