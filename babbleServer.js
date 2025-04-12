@@ -289,8 +289,12 @@ app.get('/profile', async function(req,res){
     return;
   }else{
     try {
-      stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
+      
+      userInfo = await User.findOne({username: req.session.username});
+      userAvgRating = userInfo.avgRating
 
+      stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
+/*
       //TODO: calculate this ONCE when a story is rated in /rate
       // calculate user's overall average rating
       // total up the rating of each story
@@ -304,7 +308,7 @@ app.get('/profile', async function(req,res){
           userTotalRating += stories[i].rating;
         }
         userAvgRating = Math.round(userTotalRating/stories.length);
-      }
+      } */
       
 
 
