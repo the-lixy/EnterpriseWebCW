@@ -83,7 +83,7 @@ app.get('/', async (req, res) => {
 
   // get user rankings
   userRanking = await User.find().sort({avgRating : -1}).toArray();
-  console.log(userRanking);
+  //console.log(userRanking);
   // map user rankings
   userRankingMap = {};
   userRanking.forEach(user => {
@@ -191,24 +191,9 @@ app.post('/rate', async (req, res) => {
           newTotal = story.totalrating + rating;
           newNum = story.numratings + 1;
         }
-        /*
-
-        // get the new average rating
-        story = await collection.findOne({ _id: new ObjectId(id) });
-        newTotal = story.totalrating + rating;
-        newNum = story.numratings + 1; */
-
         
         newRating = Math.round(newTotal / newNum);
-        console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
-
-        /*
-        
-
-        // add the rating to the total number of ratings and increment the number of ratings by 1
-        const result = await collection.updateOne({ _id: new ObjectId(id) },
-        { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)}, $set: {rating: newRating} },
-        ); */
+        //console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
 
         // update the story rating
         const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
@@ -230,6 +215,7 @@ app.post('/rate', async (req, res) => {
         
 
         res.json({ success: true, modified: result.modifiedCount });
+        res.redirect('/')
     } catch (err) {
         console.error("Error updating rating:", err);
         res.status(500).json({ success: false, error: err.message });

@@ -55,6 +55,7 @@
                 .then(res => res.json())
                 .then(data => {
                 //console.log("Rating saved:", data);
+                    location.reload();
                 })
                 .catch(err => console.error("Error saving rating:", err));
             });
