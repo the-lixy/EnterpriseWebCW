@@ -87,6 +87,7 @@ app.get('/', async(req, res) => {
 app.get('/', async (req, res) => {
   const genre = req.query.genre; // from ?genre=...
   const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
+  const seen = req.query.seen;
   const filterOption = {};
 
   if (genre && validGenres.includes(genre)) {
@@ -94,18 +95,20 @@ app.get('/', async (req, res) => {
   }
 
   try {
+
+    // get stories matching the filter criteria
     const heading = genre ? `${genre} Stories` : "Popular Stories";
     let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
 
 
-    // Check the "seenStories" cookie for non-logged-in users
+    // Check the "seenStories" cookie
     const seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
 
     // Filter out stories that the user has already seen
     stories = stories.filter(story => !seenStories.includes(story._id.toString()));
     res.render('pages/homepage', { heading, stories });
 
-    
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading homepage');
