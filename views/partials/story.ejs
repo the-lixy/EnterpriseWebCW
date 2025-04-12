@@ -5,7 +5,18 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Select every rating container on the page
         const ratingContainers = document.querySelectorAll('.rating-container');
-    
+
+        // Get existing cookie
+        function getRatingsCookie() {
+            const cookie = document.cookie.split('; ').find(row => row.startsWith('userRatings='));
+            return cookie ? JSON.parse(decodeURIComponent(cookie.split('=')[1])) : {};
+        }
+
+        // Set new cookie
+        function setRatingsCookie(ratingsObj) {
+            document.cookie = `userRatings=${encodeURIComponent(JSON.stringify(ratingsObj))}; path=/; max-age=${60 * 60 * 24 * 30}`; // 30 days
+        }
+
         ratingContainers.forEach(container => {
         const stars = container.querySelectorAll('.rating-star');
     
@@ -20,12 +31,17 @@
                 for (let i = 0; i < index; i++) {
                 stars[i].classList.add('checked');
                 }
-
-                //console.log("Rated:", index);
                 
+                const storyId = container.dataset.storyId; // Get story id from data attribute
+                
+                // save rating to cookie
+                const ratings = getRatingsCookie();
+                ratings[storyId] = index;
+                setRatingsCookie(ratings);
+
                 // Add rating to database
                 const newRating = index;
-                const storyId = container.dataset.storyId; // Get story id from data attribute
+                
 
                 // Send to server
                 fetch('/rate', {
@@ -42,6 +58,16 @@
                 .catch(err => console.error("Error saving rating:", err));
             });
           });
+
+            // get saved cookie
+            const savedRatings = getRatingsCookie();
+            const storyId = container.dataset.storyId;
+            const saved = savedRatings[storyId];
+            if (saved) {
+                for (let i = 0; i < saved; i++) {
+                    stars[i].classList.add('checked');
+                }
+            }
         });
       });
  </script>

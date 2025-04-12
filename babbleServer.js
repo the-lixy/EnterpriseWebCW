@@ -176,6 +176,9 @@ app.post('/rate', async (req, res) => {
     try {
         const { id, rating } = req.body;
         
+        let newTotal;
+        let newNum;
+        
         // get the new average rating
         story = await collection.findOne({ _id: new ObjectId(id) });
         newTotal = story.totalrating + rating;
