@@ -104,6 +104,8 @@ app.get('/', async (req, res) => {
     // Filter out stories that the user has already seen
     stories = stories.filter(story => !seenStories.includes(story._id.toString()));
     res.render('pages/homepage', { heading, stories });
+
+    
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading homepage');
