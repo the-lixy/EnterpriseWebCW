@@ -70,19 +70,6 @@ app.use((req, res, next) => {
   next();
   });
 
-  /*
-// home page (popular stories)
-app.get('/', async(req, res) => {
-    try {
-        heading = "Popular Stories";
-        stories = await collection.find({}).sort({ rating: -1, numratings: -1 }).toArray(); // get all stories as an array sorted by highest rating and most ratings
-        res.render('pages/homepage', { heading, stories });
-      } catch (err) {
-        console.error(err);
-        res.status(500).send('Error loading homepage');
-      }
-    }); */
-
 // home page (filterable by genre)
 app.get('/', async (req, res) => {
   const genre = req.query.genre; // from ?genre=...
@@ -294,23 +281,6 @@ app.get('/profile', async function(req,res){
       userAvgRating = userInfo.avgRating
 
       stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
-/*
-      //TODO: calculate this ONCE when a story is rated in /rate
-      // calculate user's overall average rating
-      // total up the rating of each story
-      userTotalRating = 0;
-
-      if(stories.length == 0){
-        //console.log("no stories found")
-        userAvgRating = 0;
-      }else{
-        for (let i = 0; i < stories.length; i++) {
-          userTotalRating += stories[i].rating;
-        }
-        userAvgRating = Math.round(userTotalRating/stories.length);
-      } */
-      
-
 
       res.render('pages/profile', { stories, userAvgRating });
     } catch (err) {
