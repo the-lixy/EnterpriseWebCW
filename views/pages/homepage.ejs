@@ -20,15 +20,15 @@
             <div class="form-group">
                 <div class="col-sm-2"> <select class="form-control" id="genre-select" name="genre">
                     <option value=""> All Stories</option>
-                    <option>Adventure</option>
-                    <option>Horror</option>
-                    <option>Romance</option>
-                    <option>Thriller</option>
-                    <option>SciFi</option>
-                    <option>Fantasy</option>
-                    <option>Comedy</option>
-                    <option>Fable</option>
-                    <option>Misc</option>
+                    <option  <%= genre === 'Adventure' ? 'selected' : '' %>>Adventure</option>
+                    <option  <%= genre === 'Horror' ? 'selected' : '' %>>Horror</option>
+                    <option  <%= genre === 'Romance' ? 'selected' : '' %>>Romance</option>
+                    <option  <%= genre === 'Thriller' ? 'selected' : '' %>>Thriller</option>
+                    <option  <%= genre === 'SciFi' ? 'selected' : '' %>>SciFi</option>
+                    <option  <%= genre === 'Fantasy' ? 'selected' : '' %>>Fantasy</option>
+                    <option  <%= genre === 'Comedy' ? 'selected' : '' %>>Comedy</option>
+                    <option  <%= genre === 'Fable' ? 'selected' : '' %>>Fable</option>
+                    <option  <%= genre === 'Misc' ? 'selected' : '' %>>Misc</option>
                 </select> </div>
                 <div class="col-sm-1">
                 <button type="submit" class="btn btn-default" style="display:inline"> Filter </button>
@@ -37,7 +37,7 @@
             
             <div class="col-sm-4">
                 <div class="checkbox">
-                    <label><input type="checkbox" checked="checked" name="seen">Include Previously Read Stories</label>
+                    <label><input type="checkbox" name="seen" <%= seen ? 'checked' : '' %>> Include Previously Read Stories</label>
                 </div>
             </div>
         </form>
