@@ -182,6 +182,20 @@ app.post('/rate', async (req, res) => {
         { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)}, $set: {rating: newRating} },
         );
 
+        // get all of user's stories
+        author = story.author; // maybe change this to be id for security?
+        stories = await collection.find({author: author}).toArray(); 
+
+        userTotalRating = 0;
+
+        for (let i = 0; i < stories.length; i++) {
+          userTotalRating += stories[i].rating;
+        }
+
+        userAvgRating = Math.round(userTotalRating/stories.length);
+        User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ) 
+        
+
         res.json({ success: true, modified: result.modifiedCount });
     } catch (err) {
         console.error("Error updating rating:", err);
@@ -217,6 +231,7 @@ app.post('/signup', async (req, res) => {
       newUser = {
         username: req.body.username,
         password: hashedPassword,
+        avgRating: 0,
       };
 
     // find out if username already exists
