@@ -174,24 +174,49 @@ app.post('/submittedstory', function(req, res){
 // when a story is rated, submit rating to database
 app.post('/rate', async (req, res) => {
     try {
-        const { id, rating } = req.body;
+        const { id, rating, previousRating} = req.body;
         
         let newTotal;
         let newNum;
-        
+
+
+        story = await collection.findOne({ _id: new ObjectId(id) });
+
+        // if user has previously rated the story
+        if (previousRating !== undefined && previousRating !== null) {
+          newTotal = story.totalrating - previousRating + rating;
+          newNum = story.numratings; // don't update number of ratings
+        } else {
+          // first time rating
+          newTotal = story.totalrating + rating;
+          newNum = story.numratings + 1;
+        }
+        /*
+
         // get the new average rating
         story = await collection.findOne({ _id: new ObjectId(id) });
         newTotal = story.totalrating + rating;
-        newNum = story.numratings + 1;
+        newNum = story.numratings + 1; */
+
+        
         newRating = Math.round(newTotal / newNum);
+        //console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
+
+        /*
+        
 
         // add the rating to the total number of ratings and increment the number of ratings by 1
         const result = await collection.updateOne({ _id: new ObjectId(id) },
         { $inc: { totalrating: parseInt(rating), numratings: parseInt(1)}, $set: {rating: newRating} },
-        );
+        ); */
+
+        // update the story rating
+        const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
+
+        // update author's average rating
 
         // get all of user's stories
-        author = story.author; // maybe change this to be id for security?
+        author = story.author; // TODO: maybe change this to be id for security?
         stories = await collection.find({author: author}).toArray(); 
 
         userTotalRating = 0;

@@ -33,9 +33,10 @@
                 }
                 
                 const storyId = container.dataset.storyId; // Get story id from data attribute
-                
+
                 // save rating to cookie
                 const ratings = getRatingsCookie();
+                const previousRating = ratings[storyId];
                 ratings[storyId] = index;
                 setRatingsCookie(ratings);
 
@@ -49,7 +50,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ id: storyId, rating: newRating }),
+                body: JSON.stringify({ id: storyId, rating: newRating, previousRating }),
                 })
                 .then(res => res.json())
                 .then(data => {
