@@ -135,13 +135,13 @@ app.get('/story', async(req,res) => {
 
 
 // submit page
-app.get('/submit', function(req, res){
+app.get('/submit', function(req, res) {
     res.render('pages/submit');
 });
 
 // when story is submitted, send it to database
-app.post('/submittedstory', function(req, res){
-
+app.post('/submittedstory', async(req, res) => {
+  try{
   // decide if story is posted under username or anonymously
     author = req.session.userId && !req.body.anonymous
     ? req.session.username
@@ -162,13 +162,22 @@ app.post('/submittedstory', function(req, res){
         rating: 0, // this is the average rating
         visibility: visibility, // story can be public or private
     };
-    
-    db.collection('stories').insertOne(newstory, function(err, result) {
-        if (err) throw err;
-        //console.log('saved to database')
-        })
-    res.render('pages/submittedstory', { newstory });
-});
+
+    // pass story to the database
+    result = await db.collection('stories').insertOne(newstory);
+
+    //get id of created database entry
+    const storyId = result.insertedId;
+
+    res.render('pages/submittedstory', { newstory, storyId,  username: req.session.username  });
+  }catch (err) {
+    // Catch any errors and log them
+    console.error("Error submitting story:", err);
+    res.status(500).send("Error submitting story");
+    }
+  });
+
+
 
 // when a story is rated, submit rating to database
 app.post('/rate', async (req, res) => {

@@ -14,8 +14,8 @@
         <div class="container"> <p> Thanks for submitting!</p>
 
         <!-- display message if story was posted anonymously -->
-        <% if (newstory.author === "Anonymous" || !req.session.userId ){ %>
-            <h3> it works! </h3>
+        <% if (newstory.author === "Anonymous" || !username ){ %>
+           <p> Your story was published anonymously. If you wish to claim it later, you will have to use <b>this code: </b></p>
         <%} %>
     </div>
         
