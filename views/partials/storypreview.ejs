@@ -133,11 +133,6 @@
     <% num = 100 %>
     <p><%= story.story.length > num ? story.story.slice(0, num).split(" ").slice(0, -1).join(" ") + '...' : story.story %></p>
 
-    <div class="rating-container" data-story-id="<%= story._id %>">
-        <p style="display:inline"> Click to leave a rating: </p>
-        <%- include('../partials/rating'); %>
-    </div>
-
     <br><br>
 
     <%} %>

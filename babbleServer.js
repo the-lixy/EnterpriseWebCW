@@ -81,11 +81,29 @@ app.get('/', async (req, res) => {
     filterOption.genre = genre;
   }
 
+  // get user rankings
+  userRanking = await User.find().sort({avgRating : -1}).toArray();
+  console.log(userRanking);
+  // map user rankings
+  userRankingMap = {};
+  userRanking.forEach(user => {
+    userRankingMap[user.username] = user.avgRating || 0;
+  });
+
   try {
 
     // get stories matching the filter criteria
     const heading = genre ? `${genre} Stories` : "Popular Stories";
-    let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray();
+    let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray(); // sorted by highest rating then number of ratings
+
+     //TODO: edit this to have an if statement (if author is anonymous ignore the ranking)
+    // sort by user's overall ranking next
+    stories = stories.sort((a,b) => 
+      {
+      const aAuthorRating = userRankingMap[a.author] || 0;
+      const bAuthorRating = userRankingMap[b.author] || 0;
+      return bAuthorRating - aAuthorRating;
+    })
 
     // if seen is undefined
     if(!seen){
