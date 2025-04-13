@@ -11,6 +11,17 @@
     
     <!-- Template for displaying stories -->
     <div class="container">
+        <% if (topRater) { %>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <%if (topRater.ratingCount == 1) { %>
+                    Most active rater: <b><%= topRater.username %></b> with <%= topRater.ratingCount %> rating!
+                    <% }else { %>
+                    Most active rater: <b><%= topRater.username %></b> with <%= topRater.ratingCount %> ratings!
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
 
     <div class="row">
         <div class="col-sm-5"> <h3><%= heading %></h3> </div>
@@ -18,7 +29,7 @@
         
         <form method = 'GET' action = '/'>
             <div class="form-group">
-                <div class="col-sm-2"> <select class="form-control" id="genre-select" name="genre">
+                <div class="col-sm-5"> <select class="form-control" id="genre-select" name="genre">
                     <option value=""> All Stories</option>
                     <option  <%= genre === 'Adventure' ? 'selected' : '' %>>Adventure</option>
                     <option  <%= genre === 'Horror' ? 'selected' : '' %>>Horror</option>

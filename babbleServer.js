@@ -106,7 +106,6 @@ app.get('/', async (req, res) => {
     const heading = genre ? `${genre} Stories` : "Popular Stories";
     let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray(); // sorted by highest rating then number of ratings
 
-     //TODO: edit this to have an if statement (if author is anonymous ignore the ranking)
     // sort by user's overall ranking next
     stories = stories.sort((a,b) => 
       {
@@ -130,7 +129,36 @@ app.get('/', async (req, res) => {
       stories = stories.filter(story => !seenStories.includes(story._id.toString()));
     };
 
-    res.render('pages/homepage', { heading, stories, genre, seen });
+    // identify the most active rater on the website
+    // find user who rated the most stories
+    const topRaterAgg = await db.collection('ratings').aggregate([
+      {
+        $group: {
+          _id: "$userId",          // group by user
+          ratingCount: { $sum: 1 } // count ratings
+        }
+      },
+      {
+        $sort: { ratingCount: -1 } // highest first
+      },
+      {
+        $limit: 1
+      }
+    ]).toArray();
+
+    let topRater = null;
+    if (topRaterAgg.length > 0) {
+      const topUserId = topRaterAgg[0]._id;
+      const topUser = await User.findOne({ _id: new ObjectId(topUserId) });
+      if (topUser) {
+        topRater = {
+          username: topUser.username,
+          ratingCount: topRaterAgg[0].ratingCount
+        };
+      }
+    }
+
+    res.render('pages/homepage', { heading, stories, genre, seen, topRater });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading homepage');
