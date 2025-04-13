@@ -110,9 +110,15 @@ app.get('/', async (req, res) => {
     // sort by user's overall ranking next
     stories = stories.sort((a,b) => 
       {
-      const aAuthorRating = userRankingMap[a.author] || 0;
-      const bAuthorRating = userRankingMap[b.author] || 0;
-      return bAuthorRating - aAuthorRating;
+        if (a.author == "Anonymous" || b.author == "Anonymous"){
+            // ignore anoynmous author ranking
+            return
+        }else{
+          const aAuthorRating = userRankingMap[a.author] || 0;
+          const bAuthorRating = userRankingMap[b.author] || 0;
+          return bAuthorRating - aAuthorRating;
+        }
+      
     })
 
     // if seen is undefined
@@ -275,7 +281,6 @@ app.post('/rate', async (req, res) => {
         
 
         res.json({ success: true, modified: result.modifiedCount });
-        res.redirect('/')
     } catch (err) {
         console.error("Error updating rating:", err);
         res.status(500).json({ success: false, error: err.message });
