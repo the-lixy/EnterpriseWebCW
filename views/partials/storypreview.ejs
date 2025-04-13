@@ -1,5 +1,4 @@
 <!-- Template for displaying information about stories for the home page -->
-
 <!-- script for allowing user to rate individual stories -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -46,7 +45,7 @@
       });
  </script>
 
- <!-- script to mark stories as seen -->
+ <!-- script to mark stories as seen (now in server file) -->
  <script>
     /*
     document.addEventListener("DOMContentLoaded", () => {
@@ -97,12 +96,14 @@
     <!-- only display private story if user is logged in -->
     <% if (story.visibility == "private" && username || story.visibility == "public"){ %>
 
+        
+    <!-- <div class="panel panel-default" style="background-color: red; padding: 10px;"> -->
+    <div class="panel panel-default <%= story.visibility == 'private' ? 'private-story' : 'public-story' %>" style="padding: 10px;">
+        
     <!-- display message if story is private -->
     <% if (story.visibility == "private"){ %>
-        <div class="row"> <p> *private story </p></div>
+        <div> <p> *private story </p></div>
     <%} %>
-
-
     <h4 style="display:inline"> <a href="/story?id=<%= story._id %>" class = "storyLink" data-id="<%= story._id %>" onClick="testFunc('<% story._id %>')"> <%= story.title %> </a> </h4> <p style="display:inline"> by <%=story.author %> </p>
     <!-- genre & rating boxes -->
     <div class="row">
@@ -133,14 +134,14 @@
                 </div>
             <% } %>
         <% } %>
-
     </div>
 
     <!-- define how many characters of the story should be previewed -->
     <% num = 100 %>
     <p><%= story.story.length > num ? story.story.slice(0, num).split(" ").slice(0, -1).join(" ") + '...' : story.story %></p>
+</div>
 
-    <br><br>
+    <br>
 
     <%} %>
     <% }) %>

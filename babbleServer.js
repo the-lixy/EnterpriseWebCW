@@ -26,6 +26,9 @@ app.set('view engine', 'ejs');
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+// public folder for css file
+app.use(express.static('public'));
+
 // MongoDB setup
 const { MongoClient } = require('mongodb');
 // environment variable for database security
@@ -166,6 +169,8 @@ app.get('/', async (req, res) => {
         };
       }
     }
+
+    //console.log(topRater);
 
     res.render('pages/homepage', { heading, stories, genre, seen, topRater });
   } catch (err) {

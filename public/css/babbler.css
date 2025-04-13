@@ -1,0 +1,11 @@
+.private-story {
+    background-color: #e8e8e8; /* Off-White for private stories */
+}
+
+.public-story {
+    background-color: whitesmoke; /* Light grey for public stories */
+}
+
+a {
+    color:cadetblue;
+}
