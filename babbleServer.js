@@ -324,7 +324,7 @@ app.post('/submittedstory', async(req, res) => {
 app.post('/rate', async (req, res) => {
   try {
       const { id, rating, previousRating} = req.body;
-      story = await collection.findOne({ _id: new ObjectId(id) });
+      let story = await collection.findOne({ _id: new ObjectId(id) });
       if (!story) return res.status(404).json({ success: false, message: "Story not found" });
       
       let newTotal;
