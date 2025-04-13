@@ -231,20 +231,20 @@ app.post('/story', async(req,res) => {
   try{
   //console.log("body ID received:", req.body.id);
   const storyId = req.body.id;
-  claimedStory = await collection.findOne({ _id: new ObjectId(storyId)});
+  let claimedStory = await collection.findOne({ _id: new ObjectId(storyId)});
 
   //console.log("Claimed Story:", claimedStory);
   const inputCode = req.body.claimcode;
   const claimCode = claimedStory.claimcode;
 
   //console.log("user input: " + inputCode + " claimcode: " + claimCode);
-  author = req.session.username;
+  let author = req.session.username;
   //console.log("author: " + author);
   
     
     if(inputCode == claimCode){
       //console.log("claimcode accepted")
-      await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : req.session.username } })
+      await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : author } })
       //console.log("story updated")
       res.redirect(`/story?id=${storyId}`)
 
@@ -482,11 +482,11 @@ app.get('/profile', async function(req,res){
   }else{
     try {
       
-      userInfo = await User.findOne({username: req.session.username});
-      userAvgRating = userInfo.avgRating;
-      username = req.session.username;
+      let userInfo = await User.findOne({username: req.session.username});
+      let userAvgRating = userInfo.avgRating;
+      let username = req.session.username;
 
-      stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
+      let stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
 
       res.render('pages/profile', { stories, userAvgRating, username });
     } catch (err) {
