@@ -1,0 +1,37 @@
+<html lang="en">
+    <head>
+        <title>
+            Babbler
+        </title>
+        <%- include('../partials/imports'); %>
+        <link rel="stylesheet" href="/css/babbler.css">
+
+    </head>
+    <!-- partial - navbar header -->
+    <header><%- include('../partials/header'); %></header>
+    
+    <!-- Template for displaying stories -->
+    <div class="container">
+        <% if (topRater) { %>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <%if (topRater.ratingCount == 1) { %>
+                    Most active rater: <b><%= topRater.username %></b> with <%= topRater.ratingCount %> rating!
+                    <% }else { %>
+                    Most active rater: <b><%= topRater.username %></b> with <%= topRater.ratingCount %> ratings!
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
+    <div class="row">
+        <div class="col-sm-5"> <h3>Recommended for You</h3> </div>
+    </div>
+    <div> <p> Based on your top genres </p></div>
+
+    <div><%- include('../partials/storypreview'); %></div>
+
+    <h4> You've seen it all! Why not <a href="/submit"> Submit a Story?</a> </a></h4>
+    </div>
+    
+</html>
