@@ -1,0 +1,9 @@
+@echo off
+echo Installing dependencies...
+call npm install
+
+echo Starting babbleserver.js...
+call npm start
+
+echo Server started. Press any key to exit...
+pause >nul
