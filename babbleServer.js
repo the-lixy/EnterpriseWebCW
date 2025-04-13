@@ -402,7 +402,7 @@ app.post('/signup', async (req, res) => {
         username: req.body.username,
         password: hashedPassword,
         avgRating: 0,
-        viewedStories: [{ type: ObjectId, ref: 'Story' }],
+        viewedStories: [],
       };
 
     // find out if username already exists

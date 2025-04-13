@@ -1,0 +1,27 @@
+<!-- page to display captcha on protected stories (using google reCaptcha) -->
+
+<html lang="en">
+    <head>
+        <title>
+            Babbler
+        </title>
+        <%- include('../partials/imports'); %>
+
+    </head>
+    <!-- partial - navbar header -->
+    <header><%- include('../partials/header'); %></header>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <div class="container">
+        <div class="panel panel-info"> 
+            <div class="panel-heading">
+                This work is protected by CAPTCHA. Please verify to continue.
+            </div>
+        </div>
+
+        <form action="/verify-captcha" method="POST">
+            <div class="g-recaptcha" data-sitekey="6LdPIhcrAAAAALQW_MO64ecqVeJwZAmRSKGSChZ8"></div>
+            <button type="submit">Verify & View Story</button>
+        </form>
+    </div>
+</html>
