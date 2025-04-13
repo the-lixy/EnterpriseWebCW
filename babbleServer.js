@@ -31,6 +31,11 @@ app.use(cookieParser());
 // public folder for css file
 app.use(express.static('public'));
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 // MongoDB setup
 import { MongoClient } from 'mongodb';
 // environment variable for database security
@@ -609,5 +614,5 @@ app.get('/foryou', async (req, res) => {
   }
 });
 
-app.listen(8080);
-console.log("listening on port 8080");
+app.listen(PORT);
+console.log("listening now");
