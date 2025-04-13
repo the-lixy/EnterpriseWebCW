@@ -96,7 +96,11 @@
 
                 <!-- display message if user is not logged in -->
                 <% if (!username) { %>
-                    <p> you are not logged in. work will be submitted anonymously. </p>
+                    <div class="panel panel-info"> 
+                        <div class="panel-heading">
+                            You are not logged in. This work will be submitted anonymously.      
+                        </div>
+                    </div>
                 <% } %>
                 <div class="form-group">
                     <button type="submit" class="btn btn-default">Submit</button>
