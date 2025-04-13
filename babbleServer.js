@@ -40,7 +40,7 @@ const client = new MongoClient(uri);
 
 let db;
 let collection;
-let User;
+const User = db.collection('User');
 
 
 // session for keeping users logged in
