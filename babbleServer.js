@@ -7,9 +7,6 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var session = require('express-session');
 
-// set port dynamically
-const port = process.env.PORT || 3000;
-
 const { ObjectId } = require('mongodb');
 const axios = require("axios"); //for captcha verification
 
@@ -608,5 +605,5 @@ app.get('/foryou', async (req, res) => {
   }
 });
 
-app.listen(port);
-console.log("listening");
+app.listen(8080);
+console.log("listening on port 8080");
