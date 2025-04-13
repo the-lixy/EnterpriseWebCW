@@ -429,7 +429,7 @@ app.post('/signup', async (req, res) => {
         req.session.username = newUser.username;
         req.session.loggedin = true;
         //console.log("New session userId:", req.session.userId, " New session username: ", req.session.username);
-        res.redirect('/');
+        res.redirect('/profile');
     }
   });
 
@@ -477,11 +477,12 @@ app.get('/profile', async function(req,res){
     try {
       
       userInfo = await User.findOne({username: req.session.username});
-      userAvgRating = userInfo.avgRating
+      userAvgRating = userInfo.avgRating;
+      username = req.session.username;
 
       stories = await collection.find({author: req.session.username}).toArray(); // get user's stories
 
-      res.render('pages/profile', { stories, userAvgRating });
+      res.render('pages/profile', { stories, userAvgRating, username });
     } catch (err) {
       console.error(err);
       res.status(500).send('Error loading profile');
