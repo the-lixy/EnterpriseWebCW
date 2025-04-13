@@ -12,6 +12,6 @@
     "react": "^19.1.0"
   },
   "scripts": {
-    "start": "node babbleserver.js"
+    "start": "node babbleServer.js"
   }
 }
