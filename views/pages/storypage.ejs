@@ -16,7 +16,14 @@
     <!-- display claim form on anonymous works -->
         <div class="container">
             <% if (story.author === "Anonymous"){ %>
-                <p> This work is anonymous. </p>
+                <p> This work is anonymous. If it is yours, you can claim it below: </p>
+                <form action="/storypage" method="POST">
+                    <div class="form-group">
+                        <label for="claimcode">Story Claim Code:</label>
+                        <input type="text" class="form-control" placeholder="Enter Claim Code" name="claimcode" maxlength = "30" required>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
             <% } %>
         </div>
     </div>
