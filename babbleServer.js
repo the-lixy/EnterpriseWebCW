@@ -31,17 +31,12 @@ app.use(cookieParser());
 // public folder for css file
 app.use(express.static('public'));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 // MongoDB setup
 import { MongoClient } from 'mongodb';
 // environment variable for database security
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
-await client.connect();
+//await client.connect();
 
 let db;
 let collection;
@@ -81,6 +76,11 @@ function generateClaimCode(length = 10) {
       console.error("Database connection failed:", err);
     }
   })();
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // pages --------------------------------------
 
