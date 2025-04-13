@@ -198,6 +198,9 @@ app.get('/story', async(req,res) => {
     if(req.session.userId){
       // logged in users (save to db)
       await User.updateOne({ _id: new ObjectId(req.session.userId) }, { $addToSet: { viewedStories: story._id } }); // avoids duplicates 
+
+      // add story genre to user's genre totals
+      await User.updateOne({ _id: new ObjectId(req.session.userId) },{ $inc: { [`genreCounts.${story.genre}`]: 1 } });
     }else{
       // guest users (update cookie)
       let seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
@@ -313,70 +316,71 @@ app.post('/submittedstory', async(req, res) => {
 
 // when a story is rated, submit rating to database
 app.post('/rate', async (req, res) => {
-    try {
-        const { id, rating, previousRating} = req.body;
-        story = await collection.findOne({ _id: new ObjectId(id) });
-        if (!story) return res.status(404).json({ success: false, message: "Story not found" });
-        
-        let newTotal;
-        let newNum;
+  try {
+      const { id, rating, previousRating} = req.body;
+      story = await collection.findOne({ _id: new ObjectId(id) });
+      if (!story) return res.status(404).json({ success: false, message: "Story not found" });
+      
+      let newTotal;
+      let newNum;
 
-        // if user is logged in
-        if(req.session.userId){
-          userId = req.session.userId;
-          storyId = new ObjectId(story._id);
-          existingrating = await db.collection('ratings').findOne({ userId, storyId: new ObjectId(storyId)});
+      // if user is logged in
+      if(req.session.userId){
+        userId = req.session.userId;
+        storyId = new ObjectId(story._id);
+        existingrating = await db.collection('ratings').findOne({ userId, storyId: new ObjectId(storyId)});
 
-          if(existingrating){
-            newTotal = story.totalrating - previousRating + rating;
-            newNum = story.numratings; // don't update number of ratings
+        if(existingrating){
+          newTotal = story.totalrating - previousRating + rating;
+          newNum = story.numratings; // don't update number of ratings
 
-            await db.collection('ratings').updateOne({ userId, storyId: new ObjectId(storyId) }, {$set: {rating} });
-          }else{
-            newTotal = story.totalrating + rating;
-            newNum = story.numratings + 1;
+          await db.collection('ratings').updateOne({ userId, storyId: new ObjectId(storyId) }, {$set: {rating} });
+        }else{
+          newTotal = story.totalrating + rating;
+          newNum = story.numratings + 1;
 
-            await db.collection('ratings').insertOne({ userId, storyId: new ObjectId(storyId), rating });
-          };
+          await db.collection('ratings').insertOne({ userId, storyId: new ObjectId(storyId), rating });
+        };
+      }
+
+      // guest user
+      else{
+        if (previousRating !== undefined && previousRating !== null) {
+          newTotal = story.totalrating - previousRating + rating;
+          newNum = story.numratings; // don't update number of ratings
+        } else {
+          // first time rating
+          newTotal = story.totalrating + rating;
+          newNum = story.numratings + 1;
         }
+      }
+      
+      const newRating = Math.round(newTotal / newNum);
 
-        // guest user
-        else{
-          if (previousRating !== undefined && previousRating !== null) {
-            newTotal = story.totalrating - previousRating + rating;
-            newNum = story.numratings; // don't update number of ratings
-          } else {
-            // first time rating
-            newTotal = story.totalrating + rating;
-            newNum = story.numratings + 1;
-          }
-        }
-        
-        const newRating = Math.round(newTotal / newNum);
+      const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
 
-        const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
+      // update author's average rating
+      // get all of user's stories
+      author = story.author; // TODO: maybe change this to be id for security?
+      stories = await collection.find({author: author}).toArray(); 
 
-        // update author's average rating
-        // get all of user's stories
-        author = story.author; // TODO: maybe change this to be id for security?
-        stories = await collection.find({author: author}).toArray(); 
+      userTotalRating = 0;
 
-        userTotalRating = 0;
+      for (let i = 0; i < stories.length; i++) {
+        userTotalRating += stories[i].rating;
+      }
 
-        for (let i = 0; i < stories.length; i++) {
-          userTotalRating += stories[i].rating;
-        }
+      userAvgRating = Math.round(userTotalRating/stories.length);
+      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
+      
 
-        userAvgRating = Math.round(userTotalRating/stories.length);
-        User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
-        
+      res.json({ success: true, modified: result.modifiedCount });
+  } catch (err) {
+      console.error("Error updating rating:", err);
+      res.status(500).json({ success: false, error: err.message });
+  }
+});
 
-        res.json({ success: true, modified: result.modifiedCount });
-    } catch (err) {
-        console.error("Error updating rating:", err);
-        res.status(500).json({ success: false, error: err.message });
-    }
-    });
 
 // when a user presses "delete" on their post, query the database
 app.post('/delete', async(req,res) => {
@@ -408,6 +412,7 @@ app.post('/signup', async (req, res) => {
         password: hashedPassword,
         avgRating: 0,
         viewedStories: [],
+        genreCounts: {},
       };
 
     // find out if username already exists
@@ -509,6 +514,84 @@ app.post('/verify-captcha', async (req, res) => {
     console.error(err);
     res.status(500).send('CAPTCHA verification error');
   }
+});
+
+// "for you" page sorted by user's top genres
+app.get('/foryou', async (req, res) => {
+  const genre = req.query.genre;
+  const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
+  const seen = req.query.seen;
+  const filterOption = {};
+
+  if (genre && validGenres.includes(genre)) {
+    filterOption.genre = genre;
+  }
+
+  // Get all stories based on filter
+  let stories = await collection.find(filterOption).toArray();
+
+  // Get user rankings
+  const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
+  const userRankingMap = {};
+  userRanking.forEach(user => {
+    userRankingMap[user.username] = user.avgRating || 0;
+  });
+
+  // Sort by author ranking (ignore anonymous)
+  stories = stories.sort((a, b) => {
+    if (a.author === "Anonymous" || b.author === "Anonymous") return 0;
+    return (userRankingMap[b.author] || 0) - (userRankingMap[a.author] || 0);
+  });
+
+  // Filter out seen stories
+  if (!seen) {
+    let viewedStoryIds = [];
+    if (req.session.userId) {
+      const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
+      viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
+
+      // Sort by user's favorite genres
+      if (!genre && user.genreCounts) {
+        const sortedGenres = Object.entries(user.genreCounts)
+          .sort(([, a], [, b]) => b - a)
+          .map(([genre]) => genre);
+
+        // Prioritize stories matching top genres
+        stories = stories.sort((a, b) => {
+          const aPriority = sortedGenres.indexOf(a.genre);
+          const bPriority = sortedGenres.indexOf(b.genre);
+          return (aPriority === -1 ? Infinity : aPriority) - (bPriority === -1 ? Infinity : bPriority);
+        });
+      }
+
+    } else {
+      // Guest user
+      viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+    }
+
+    stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
+  }
+
+  // Get top rater info
+  const topRaterAgg = await db.collection('ratings').aggregate([
+    { $group: { _id: "$userId", ratingCount: { $sum: 1 } } },
+    { $sort: { ratingCount: -1 } },
+    { $limit: 1 }
+  ]).toArray();
+
+  let topRater = null;
+  if (topRaterAgg.length > 0) {
+    const topUser = await User.findOne({ _id: new ObjectId(topRaterAgg[0]._id) });
+    if (topUser) {
+      topRater = {
+        username: topUser.username,
+        ratingCount: topRaterAgg[0].ratingCount
+      };
+    }
+  }
+
+  const heading = genre ? `${genre} Stories` : "Recommended For You";
+  res.render('pages/homepage', { heading, stories, genre, seen, topRater });
 });
 
 app.listen(8080);
