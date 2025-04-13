@@ -406,8 +406,8 @@ app.get('/signup', function(req, res){
 });
 
 app.post('/signup', async (req, res) => {
-    hashedPassword = await bcrypt.hash(req.body.password, 10);
-      newUser = {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const newUser = {
         username: req.body.username,
         password: hashedPassword,
         avgRating: 0,
@@ -416,17 +416,22 @@ app.post('/signup', async (req, res) => {
       };
 
     // find out if username already exists
-    existing = await User.findOne({ username: newUser.username });
+    const existing = await User.findOne({ username: newUser.username });
     if(existing){
         res.send("Username taken.")
-    // add user to database
+    // don't allow "anonymous" as username
     } else if(newUser.username.toUpperCase() == "ANONYMOUS"){
       res.send('Invalid username.')
     }else {
-        await User.insertOne(newUser);
-        res.redirect('/login');
+        // add user to database
+        const result = await User.insertOne(newUser);
+        req.session.userId = result.insertedId;
+        req.session.username = newUser.username;
+        req.session.loggedin = true;
+        //console.log("New session userId:", req.session.userId, " New session username: ", req.session.username);
+        res.redirect('/');
     }
-    });
+  });
 
 // login page
 app.get('/login', function(req, res){
@@ -590,8 +595,7 @@ app.get('/foryou', async (req, res) => {
     }
   }
 
-  const heading = genre ? `${genre} Stories` : "Recommended For You";
-  res.render('pages/homepage', { heading, stories, genre, seen, topRater });
+  res.render('pages/foryou', { stories, genre, seen, topRater });
 });
 
 app.listen(8080);
