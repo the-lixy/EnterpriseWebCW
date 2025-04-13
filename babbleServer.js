@@ -1,14 +1,15 @@
-var http = require('http');
-var express = require('express');
-var app = express();
-var ejs = require('ejs');
+import http from 'http';
+import express from 'express';
+import ejs from 'ejs';
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcrypt');
-var session = require('express-session');
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import session from 'express-session';
 
-const { ObjectId } = require('mongodb');
-const axios = require("axios"); //for captcha verification
+import { ObjectId } from 'mongodb';
+import axios from 'axios'; // for captcha verification
+
+const app = express();
 
 //for using post in forums
 app.use(express.urlencoded({extended:true}))
@@ -17,23 +18,25 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json());
 
 // load environment variables
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 // using ejs for templating
 app.set('view engine', 'ejs');
 
 // cookie parser for saving users' viewed stories in a cookie
-const cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 
 // public folder for css file
 app.use(express.static('public'));
 
 // MongoDB setup
-const { MongoClient } = require('mongodb');
+import { MongoClient } from 'mongodb';
 // environment variable for database security
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
+await client.connect();
 
 let db;
 let collection;
@@ -86,6 +89,7 @@ app.use((req, res, next) => {
 
 // home page (filterable by genre)
 app.get('/', async (req, res) => {
+  const collection = db.collection('stories');
   const genre = req.query.genre; // from ?genre=...
   const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
   const seen = req.query.seen; // if seen stories is unchecked this will be undefined
@@ -96,10 +100,10 @@ app.get('/', async (req, res) => {
   }
 
   // get user rankings
-  userRanking = await User.find().sort({avgRating : -1}).toArray();
+  let userRanking = await User.find().sort({avgRating : -1}).toArray();
   //console.log(userRanking);
   // map user rankings
-  userRankingMap = {};
+  let userRankingMap = {};
   userRanking.forEach(user => {
     userRankingMap[user.username] = user.avgRating || 0;
   });
