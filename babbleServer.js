@@ -400,7 +400,7 @@ app.get('/signup', function(req, res){
       res.redirect('/');
       return;
     }else{
-      res.render('pages/signup');
+      res.render('pages/signup', { errorMessage: undefined });
     }
     
 });
@@ -418,10 +418,10 @@ app.post('/signup', async (req, res) => {
     // find out if username already exists
     const existing = await User.findOne({ username: newUser.username });
     if(existing){
-        res.send("Username taken.")
+      res.render('pages/signup', { errorMessage: "Username taken." });
     // don't allow "anonymous" as username
     } else if(newUser.username.toUpperCase() == "ANONYMOUS"){
-      res.send('Invalid username.')
+      res.render('pages/signup', { errorMessage: "Invalid username" });
     }else {
         // add user to database
         const result = await User.insertOne(newUser);
