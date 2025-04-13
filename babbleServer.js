@@ -258,6 +258,9 @@ app.post('/submittedstory', async(req, res) => {
     ? "public"
     : "private";
 
+    // decide if story is captcha protected
+    captchaprotected = req.body.captchaprotected === 'on';
+
     const newstory = {
         title: req.body.title,
         story: req.body.story,
@@ -267,6 +270,7 @@ app.post('/submittedstory', async(req, res) => {
         numratings: 0,
         rating: 0, // this is the average rating
         visibility: visibility, // story can be public or private
+        captchaprotected, // optional anti-web scraping
     };
 
     if (newstory.author === "Anonymous"){
