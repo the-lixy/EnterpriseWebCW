@@ -11,6 +11,15 @@
     
     <!-- Template for displaying stories -->
     <div class="container">
-    <div><%- include('../partials/story'); %></div>
+        <div><%- include('../partials/story'); %></div>
+
+    <!-- display claim form on anonymous works -->
+        <div class="container">
+            <% if (story.author === "Anonymous"){ %>
+                <p> This work is anonymous. </p>
+            <% } %>
+        </div>
     </div>
+
+
 </html>
