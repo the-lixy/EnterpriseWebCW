@@ -273,7 +273,7 @@ app.get('/submit', function(req, res) {
 app.post('/submittedstory', async(req, res) => {
   try{
   // decide if story is posted under username or anonymously
-    author = req.session.userId && !req.body.anonymous
+    let author = req.session.userId && !req.body.anonymous
     ? req.session.username
     : "Anonymous";
 
