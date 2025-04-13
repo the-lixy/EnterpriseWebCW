@@ -241,31 +241,48 @@ app.post('/submittedstory', async(req, res) => {
 app.post('/rate', async (req, res) => {
     try {
         const { id, rating, previousRating} = req.body;
+        story = await collection.findOne({ _id: new ObjectId(id) });
+        if (!story) return res.status(404).json({ success: false, message: "Story not found" });
         
         let newTotal;
         let newNum;
 
+        // if user is logged in
+        if(req.session.userId){
+          userId = req.session.userId;
+          storyId = new ObjectId(story._id);
+          existingrating = await db.collection('ratings').findOne({ userId, storyId: new ObjectId(storyId)});
 
-        story = await collection.findOne({ _id: new ObjectId(id) });
+          if(existingrating){
+            newTotal = story.totalrating - previousRating + rating;
+            newNum = story.numratings; // don't update number of ratings
 
-        // if user has previously rated the story
-        if (previousRating !== undefined && previousRating !== null) {
-          newTotal = story.totalrating - previousRating + rating;
-          newNum = story.numratings; // don't update number of ratings
-        } else {
-          // first time rating
-          newTotal = story.totalrating + rating;
-          newNum = story.numratings + 1;
+            await db.collection('ratings').updateOne({ userId, storyId: new ObjectId(storyId) }, {$set: {rating} });
+          }else{
+            newTotal = story.totalrating + rating;
+            newNum = story.numratings + 1;
+
+            await db.collection('ratings').insertOne({ userId, storyId: new ObjectId(storyId), rating });
+          };
+        }
+
+        // guest user
+        else{
+          if (previousRating !== undefined && previousRating !== null) {
+            newTotal = story.totalrating - previousRating + rating;
+            newNum = story.numratings; // don't update number of ratings
+          } else {
+            // first time rating
+            newTotal = story.totalrating + rating;
+            newNum = story.numratings + 1;
+          }
         }
         
-        newRating = Math.round(newTotal / newNum);
-        //console.log("newTotal: " + newTotal + " newNum: " + newNum + " newRating: " + newRating);
+        const newRating = Math.round(newTotal / newNum);
 
-        // update the story rating
         const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
 
         // update author's average rating
-
         // get all of user's stories
         author = story.author; // TODO: maybe change this to be id for security?
         stories = await collection.find({author: author}).toArray(); 
@@ -277,7 +294,7 @@ app.post('/rate', async (req, res) => {
         }
 
         userAvgRating = Math.round(userTotalRating/stories.length);
-        User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ) 
+        User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
         
 
         res.json({ success: true, modified: result.modifiedCount });
