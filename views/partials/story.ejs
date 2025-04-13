@@ -3,9 +3,7 @@
 <!-- script for allowing user to rate stories -->
  <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Select every rating container on the page
-        const ratingContainers = document.querySelectorAll('.rating-container');
-
+        
         // Get existing cookie
         function getRatingsCookie() {
             const cookie = document.cookie.split('; ').find(row => row.startsWith('userRatings='));
@@ -17,6 +15,9 @@
             document.cookie = `userRatings=${encodeURIComponent(JSON.stringify(ratingsObj))}; path=/; max-age=${60 * 60 * 24 * 30}`; // 30 days
         }
 
+        // Display star rating
+        // Select every rating container on the page
+        const ratingContainers = document.querySelectorAll('.rating-container');
         ratingContainers.forEach(container => {
         const stars = container.querySelectorAll('.rating-star');
     

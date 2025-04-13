@@ -122,15 +122,23 @@ app.get('/', async (req, res) => {
 
     // if seen is undefined
     if(!seen){
-      // Check the "seenStories" cookie
-      const seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+      let viewedStoryIds  = [];
+
+      // logged-in users: fetch viewed stories from DB
+      if (req.session.userId) {
+        const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
+        viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
+      } else {
+        // guest users: fetch viewed stories from cookies
+        viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+      }
 
       // Filter out stories that the user has already seen
-      stories = stories.filter(story => !seenStories.includes(story._id.toString()));
+      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
+    
     };
 
-    // identify the most active rater on the website
-    // find user who rated the most stories
+    // find top rater on the site
     const topRaterAgg = await db.collection('ratings').aggregate([
       {
         $group: {
@@ -170,6 +178,23 @@ app.get('/story', async(req,res) => {
   const storyId = req.query.id;
   try {
     const story = await collection.findOne({ _id: new ObjectId(storyId) });
+
+    // mark story as seen
+    if(req.session.userId){
+      // logged in users (save to db)
+      await User.updateOne({ _id: new ObjectId(req.session.userId) }, { $addToSet: { viewedStories: story._id } }); // avoids duplicates 
+    }else{
+      // guest users (update cookie)
+      let seenStories = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+      if (!seenStories.includes(storyId)) {
+        seenStories.push(storyId);
+        res.cookie('seenStories', JSON.stringify(seenStories), {
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+          httpOnly: false, // needs to be readable by client (optional)
+        });
+      }
+    };
+
     res.render('pages/storypage', { story,  errorMessage: undefined });
   } catch (err) {
     console.error(err);
@@ -361,6 +386,7 @@ app.post('/signup', async (req, res) => {
         username: req.body.username,
         password: hashedPassword,
         avgRating: 0,
+        viewedStories: [{ type: ObjectId, ref: 'Story' }],
       };
 
     // find out if username already exists
