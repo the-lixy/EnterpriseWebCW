@@ -278,12 +278,12 @@ app.post('/submittedstory', async(req, res) => {
     : "Anonymous";
 
   // decide if story is public or private
-    visibility = !req.body.private
+    let visibility = !req.body.private
     ? "public"
     : "private";
 
     // decide if story is captcha protected
-    captchaprotected = !req.body.captchaprotected
+    let captchaprotected = !req.body.captchaprotected
     ? "false"
     : "true";
 
@@ -304,11 +304,11 @@ app.post('/submittedstory', async(req, res) => {
     };
 
     // pass story to the database
-    result = await db.collection('stories').insertOne(newstory);
+    const result = await db.collection('stories').insertOne(newstory);
 
     //get id of created database entry
-    storyId = result.insertedId;
-    claimcode = newstory.claimcode;
+    let storyId = result.insertedId;
+    let claimcode = newstory.claimcode;
 
     res.render('pages/submittedstory', { newstory, storyId,  username: req.session.username, claimcode });
   }catch (err) {
@@ -332,9 +332,9 @@ app.post('/rate', async (req, res) => {
 
       // if user is logged in
       if(req.session.userId){
-        userId = req.session.userId;
-        storyId = new ObjectId(story._id);
-        existingrating = await db.collection('ratings').findOne({ userId, storyId: new ObjectId(storyId)});
+        let userId = req.session.userId;
+        let storyId = new ObjectId(story._id);
+        let existingrating = await db.collection('ratings').findOne({ userId, storyId: new ObjectId(storyId)});
 
         if(existingrating){
           newTotal = story.totalrating - previousRating + rating;
@@ -367,16 +367,16 @@ app.post('/rate', async (req, res) => {
 
       // update author's average rating
       // get all of user's stories
-      author = story.author; // TODO: maybe change this to be id for security?
-      stories = await collection.find({author: author}).toArray(); 
+      let author = story.author; // TODO: maybe change this to be id for security?
+      const stories = await collection.find({author: author}).toArray(); 
 
-      userTotalRating = 0;
+      let userTotalRating = 0;
 
       for (let i = 0; i < stories.length; i++) {
         userTotalRating += stories[i].rating;
       }
 
-      userAvgRating = Math.round(userTotalRating/stories.length);
+      let userAvgRating = Math.round(userTotalRating/stories.length);
       User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
       
 
