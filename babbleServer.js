@@ -8,6 +8,7 @@ var bcrypt = require('bcrypt');
 var session = require('express-session');
 
 const { ObjectId } = require('mongodb');
+const axios = require("axios"); //for captcha verification
 
 //for using post in forums
 app.use(express.urlencoded({extended:true}))
@@ -179,6 +180,15 @@ app.get('/story', async(req,res) => {
   try {
     const story = await collection.findOne({ _id: new ObjectId(storyId) });
 
+    // check CAPTCHA protection
+    if (story.captchaprotected == "true" && !req.session.loggedin) {
+      const passed = req.session.captchaPassedFor?.includes(storyId);
+      if (!passed) {
+        req.session.requestedStoryId = storyId;
+        return res.redirect('/verify-captcha');
+      };
+    };
+
     // mark story as seen
     if(req.session.userId){
       // logged in users (save to db)
@@ -259,7 +269,9 @@ app.post('/submittedstory', async(req, res) => {
     : "private";
 
     // decide if story is captcha protected
-    captchaprotected = req.body.captchaprotected === 'on';
+    captchaprotected = !req.body.captchaprotected
+    ? "false"
+    : "true";
 
     const newstory = {
         title: req.body.title,
@@ -270,7 +282,7 @@ app.post('/submittedstory', async(req, res) => {
         numratings: 0,
         rating: 0, // this is the average rating
         visibility: visibility, // story can be public or private
-        captchaprotected, // optional anti-web scraping
+        captchaprotected: captchaprotected, // optional anti-web scraping
     };
 
     if (newstory.author === "Anonymous"){
@@ -462,6 +474,37 @@ app.get('/profile', async function(req,res){
   }
 });  
 
+// route to verify captcha
+app.get('/verify-captcha', (req, res) => {
+  if (!req.session.requestedStoryId) {
+    return res.redirect('/');
+  }
+  res.render('pages/verify-captcha');
+});
+
+app.post('/verify-captcha', async (req, res) => {
+  const captchaResponse = req.body['g-recaptcha-response'];
+  const secretKey = process.env.RECAPTCHA_SECRET;
+
+  try {
+    const result = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaResponse}`
+    );
+
+    if (result.data.success) {
+      const storyId = req.session.requestedStoryId;
+      req.session.captchaPassedFor = req.session.captchaPassedFor || [];
+      req.session.captchaPassedFor.push(storyId);
+      delete req.session.requestedStoryId;
+      return res.redirect(`/story?id=${storyId}`);
+    } else {
+      res.send('CAPTCHA failed. Please try again.');
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('CAPTCHA verification error');
+  }
+});
 
 app.listen(8080);
 console.log("listening on port 8080");
