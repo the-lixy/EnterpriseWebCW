@@ -524,79 +524,85 @@ app.post('/verify-captcha', async (req, res) => {
 
 // "for you" page sorted by user's top genres
 app.get('/foryou', async (req, res) => {
-  const genre = req.query.genre;
-  const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
-  const seen = req.query.seen;
-  const filterOption = {};
 
-  if (genre && validGenres.includes(genre)) {
-    filterOption.genre = genre;
-  }
+  if(!req.session.loggedin){
+    res.redirect('/');
+    return;
+  }else{
+    const genre = req.query.genre;
+    const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
+    const seen = req.query.seen;
+    const filterOption = {};
 
-  // Get all stories based on filter
-  let stories = await collection.find(filterOption).toArray();
+    if (genre && validGenres.includes(genre)) {
+      filterOption.genre = genre;
+    }
 
-  // Get user rankings
-  const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
-  const userRankingMap = {};
-  userRanking.forEach(user => {
-    userRankingMap[user.username] = user.avgRating || 0;
-  });
+    // Get all stories based on filter
+    let stories = await collection.find(filterOption).toArray();
 
-  // Sort by author ranking (ignore anonymous)
-  stories = stories.sort((a, b) => {
-    if (a.author === "Anonymous" || b.author === "Anonymous") return 0;
-    return (userRankingMap[b.author] || 0) - (userRankingMap[a.author] || 0);
-  });
+    // Get user rankings
+    const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
+    const userRankingMap = {};
+    userRanking.forEach(user => {
+      userRankingMap[user.username] = user.avgRating || 0;
+    });
 
-  // Filter out seen stories
-  if (!seen) {
-    let viewedStoryIds = [];
-    if (req.session.userId) {
-      const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
-      viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
+    // Sort by author ranking (ignore anonymous)
+    stories = stories.sort((a, b) => {
+      if (a.author === "Anonymous" || b.author === "Anonymous") return 0;
+      return (userRankingMap[b.author] || 0) - (userRankingMap[a.author] || 0);
+    });
 
-      // Sort by user's favorite genres
-      if (!genre && user.genreCounts) {
-        const sortedGenres = Object.entries(user.genreCounts)
-          .sort(([, a], [, b]) => b - a)
-          .map(([genre]) => genre);
+    // Filter out seen stories
+    if (!seen) {
+      let viewedStoryIds = [];
+      if (req.session.userId) {
+        const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
+        viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
 
-        // Prioritize stories matching top genres
-        stories = stories.sort((a, b) => {
-          const aPriority = sortedGenres.indexOf(a.genre);
-          const bPriority = sortedGenres.indexOf(b.genre);
-          return (aPriority === -1 ? Infinity : aPriority) - (bPriority === -1 ? Infinity : bPriority);
-        });
+        // Sort by user's favorite genres
+        if (!genre && user.genreCounts) {
+          const sortedGenres = Object.entries(user.genreCounts)
+            .sort(([, a], [, b]) => b - a)
+            .map(([genre]) => genre);
+
+          // Prioritize stories matching top genres
+          stories = stories.sort((a, b) => {
+            const aPriority = sortedGenres.indexOf(a.genre);
+            const bPriority = sortedGenres.indexOf(b.genre);
+            return (aPriority === -1 ? Infinity : aPriority) - (bPriority === -1 ? Infinity : bPriority);
+          });
+        }
+
+      } else {
+        // Guest user
+        viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
       }
 
-    } else {
-      // Guest user
-      viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
     }
 
-    stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
-  }
+    // Get top rater info
+    const topRaterAgg = await db.collection('ratings').aggregate([
+      { $group: { _id: "$userId", ratingCount: { $sum: 1 } } },
+      { $sort: { ratingCount: -1 } },
+      { $limit: 1 }
+    ]).toArray();
 
-  // Get top rater info
-  const topRaterAgg = await db.collection('ratings').aggregate([
-    { $group: { _id: "$userId", ratingCount: { $sum: 1 } } },
-    { $sort: { ratingCount: -1 } },
-    { $limit: 1 }
-  ]).toArray();
-
-  let topRater = null;
-  if (topRaterAgg.length > 0) {
-    const topUser = await User.findOne({ _id: new ObjectId(topRaterAgg[0]._id) });
-    if (topUser) {
-      topRater = {
-        username: topUser.username,
-        ratingCount: topRaterAgg[0].ratingCount
-      };
+    let topRater = null;
+    if (topRaterAgg.length > 0) {
+      const topUser = await User.findOne({ _id: new ObjectId(topRaterAgg[0]._id) });
+      if (topUser) {
+        topRater = {
+          username: topUser.username,
+          ratingCount: topRaterAgg[0].ratingCount
+        };
+      }
     }
-  }
 
-  res.render('pages/foryou', { stories, genre, seen, topRater });
+    res.render('pages/foryou', { stories, genre, seen, topRater });
+  }
 });
 
 app.listen(8080);
