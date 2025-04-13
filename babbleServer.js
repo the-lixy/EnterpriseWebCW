@@ -11,10 +11,10 @@ import axios from 'axios'; // for captcha verification
 
 const app = express();
 
-//for using post in forums
-app.use(express.urlencoded({extended:true}))
+// for using post in forums
+app.use(express.urlencoded({ extended: true }));
 
-//for parsing json requests
+// for parsing json requests
 app.use(express.json());
 
 // load environment variables
@@ -36,46 +36,48 @@ import { MongoClient } from 'mongodb';
 // environment variable for database security
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
-//await client.connect();
 
+// Declare db variable here so you can access it throughout the code
 let db;
 let collection;
-const User = db.collection('User');
+let User;
 
+// Connect to MongoDB and assign collection references
+(async () => {
+  try {
+    await client.connect();
+    db = client.db('EnterprizeWebCW');
+    collection = db.collection('stories');
+    User = db.collection('User'); // Assign User collection here
+  } catch (err) {
+    console.error("Database connection failed:", err);
+  }
+})();
 
 // session for keeping users logged in
-app.use(session({
+app.use(
+  session({
     secret: 'secretkey', // use env var in prod
     resave: false,
     saveUninitialized: false
-  }));
+  })
+);
 
 // function to authenticate login
 function checkAuth(req, res, next) {
-    if (req.session.userId) return next();
-    res.redirect('/login');
-  }
+  if (req.session.userId) return next();
+  res.redirect('/login');
+}
 
-//function to generate random claim code for anonymous stories
+// function to generate random claim code for anonymous stories
 function generateClaimCode(length = 10) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
 }
-
-(async () => {
-    try {
-      await client.connect();
-      db = client.db('EnterprizeWebCW');
-      collection = db.collection('stories');
-      User = db.collection('User')
-    } catch (err) {
-      console.error("Database connection failed:", err);
-    }
-  })();
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
@@ -90,11 +92,10 @@ app.use((req, res, next) => {
   res.locals.username = req.session.username;
   res.locals.path = req.path;
   next();
-  });
+});
 
 // home page (filterable by genre)
 app.get('/', async (req, res) => {
-  const collection = db.collection('stories');
   const genre = req.query.genre; // from ?genre=...
   const validGenres = ['Adventure', 'Horror', 'Romance', 'Thriller', 'SciFi', 'Fantasy', 'Comedy', 'Fable', 'Misc'];
   const seen = req.query.seen; // if seen stories is unchecked this will be undefined
@@ -105,51 +106,48 @@ app.get('/', async (req, res) => {
   }
 
   // get user rankings
-  let userRanking = await User.find().sort({avgRating : -1}).toArray();
-  //console.log(userRanking);
-  // map user rankings
+  let userRanking = await User.find().sort({ avgRating: -1 }).toArray();
   let userRankingMap = {};
-  userRanking.forEach(user => {
+  userRanking.forEach((user) => {
     userRankingMap[user.username] = user.avgRating || 0;
   });
 
   try {
-
     // get stories matching the filter criteria
     const heading = genre ? `${genre} Stories` : "Popular Stories";
-    let stories = await collection.find(filterOption).sort({ rating: -1, numratings: -1 }).toArray(); // sorted by highest rating then number of ratings
+    let stories = await collection
+      .find(filterOption)
+      .sort({ rating: -1, numratings: -1 })
+      .toArray(); // sorted by highest rating then number of ratings
 
     // sort by user's overall ranking next
-    stories = stories.sort((a,b) => 
-      {
-        if (a.author == "Anonymous" || b.author == "Anonymous"){
-            // ignore anoynmous author ranking
-            return
-        }else{
-          const aAuthorRating = userRankingMap[a.author] || 0;
-          const bAuthorRating = userRankingMap[b.author] || 0;
-          return bAuthorRating - aAuthorRating;
-        }
-      
-    })
+    stories = stories.sort((a, b) => {
+      if (a.author == "Anonymous" || b.author == "Anonymous") {
+        // ignore anonymous author ranking
+        return 0;
+      } else {
+        const aAuthorRating = userRankingMap[a.author] || 0;
+        const bAuthorRating = userRankingMap[b.author] || 0;
+        return bAuthorRating - aAuthorRating;
+      }
+    });
 
     // if seen is undefined
-    if(!seen){
-      let viewedStoryIds  = [];
+    if (!seen) {
+      let viewedStoryIds = [];
 
       // logged-in users: fetch viewed stories from DB
       if (req.session.userId) {
         const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
-        viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
+        viewedStoryIds = user?.viewedStories?.map((id) => id.toString()) || [];
       } else {
         // guest users: fetch viewed stories from cookies
         viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
       }
 
       // Filter out stories that the user has already seen
-      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
-    
-    };
+      stories = stories.filter((story) => !viewedStoryIds.includes(story._id.toString()));
+    }
 
     // find top rater on the site
     const topRaterAgg = await db.collection('ratings').aggregate([
@@ -179,14 +177,13 @@ app.get('/', async (req, res) => {
       }
     }
 
-    //console.log(topRater);
-
     res.render('pages/homepage', { heading, stories, genre, seen, topRater });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading homepage');
   }
 });
+
 
 // story page
 app.get('/story', async(req,res) => {
