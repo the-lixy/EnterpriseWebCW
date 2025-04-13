@@ -13,19 +13,32 @@
     <div class="container">
         <div><%- include('../partials/story'); %></div>
 
-    <!-- display claim form on anonymous works -->
-        <div class="container">
-            <% if (story.author === "Anonymous"){ %>
+    <!-- display claim form on anonymous works when user is logged in -->
+        <div class="container"> <!--  data-story-id="<%= story._id %> -->
+            <% if (story.author === "Anonymous" && username ){ %>
                 <p> This work is anonymous. If it is yours, you can claim it below: </p>
-                <form action="/storypage" method="POST">
+                <form action="/story" method="POST">
                     <div class="form-group">
                         <label for="claimcode">Story Claim Code:</label>
                         <input type="text" class="form-control" placeholder="Enter Claim Code" name="claimcode" maxlength = "30" required>
+                        
+                        <!-- Hidden field for story ID -->
+                        <input type="hidden" name="id" value="<%= story._id %>">
+
                         <button type="submit" class="btn btn-default">Submit</button>
                     </div>
                 </form>
             <% } %>
+
+            <!-- Show error message if claim code is incorrect -->
+            <% if (errorMessage) { %>
+                <div class="alert alert-danger">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
         </div>
+
+
     </div>
 
 

@@ -29,6 +29,14 @@
                 </div>
 
             </form>
+
+                <!-- Show error message if login fails -->
+                <% if (errorMessage) { %>
+                    <div class="alert alert-danger">
+                        <%= errorMessage %>
+                    </div>
+                <% } %>
+
             </div>
 
     </body>

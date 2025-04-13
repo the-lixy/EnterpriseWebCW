@@ -16,7 +16,7 @@
         <!-- display message if story was posted anonymously -->
         <% if (newstory.author === "Anonymous" || !username ){ %>
            <p> <b> Your story was published anonymously. If you wish to claim it later, you will have to use this code: </b></p>
-           <p> <b> <%= storyId %> </b></p>
+           <p> <b> <%= claimcode %> </b></p>
            <p> Please save it somewhere secure. You cannot retrieve this code again. </p>
         <%} %>
     </div>

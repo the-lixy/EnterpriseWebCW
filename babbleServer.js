@@ -49,6 +49,16 @@ function checkAuth(req, res, next) {
     res.redirect('/login');
   }
 
+//function to generate random claim code for anonymous stories
+function generateClaimCode(length = 10) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 (async () => {
     try {
       await client.connect();
@@ -126,11 +136,48 @@ app.get('/story', async(req,res) => {
   const storyId = req.query.id;
   try {
     const story = await collection.findOne({ _id: new ObjectId(storyId) });
-    res.render('pages/storypage', { story });
+    res.render('pages/storypage', { story,  errorMessage: undefined });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading story');
   }
+});
+
+// claiming story
+app.post('/story', async(req,res) => {
+  try{
+  //console.log("body ID received:", req.body.id);
+  const storyId = req.body.id;
+  claimedStory = await collection.findOne({ _id: new ObjectId(storyId)});
+
+  //console.log("Claimed Story:", claimedStory);
+  const inputCode = req.body.claimcode;
+  const claimCode = claimedStory.claimcode;
+
+  //console.log("user input: " + inputCode + " claimcode: " + claimCode);
+  author = req.session.username;
+  //console.log("author: " + author);
+  
+    
+    if(inputCode == claimCode){
+      //console.log("claimcode accepted")
+      await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : req.session.username } })
+      //console.log("story updated")
+      res.redirect(`/story?id=${storyId}`)
+
+    }else {
+      console.log("ERROR claimcode denied");
+
+      // Pass an error message to the view
+      res.render('pages/storypage', {
+        story: claimedStory,
+        errorMessage: 'Incorrect claim code. Please try again.' // Error message
+      });
+    }
+  }catch(err){
+    console.error(err);
+    res.status(500).send('Error claiming story');
+  };
 });
 
 
@@ -163,13 +210,18 @@ app.post('/submittedstory', async(req, res) => {
         visibility: visibility, // story can be public or private
     };
 
+    if (newstory.author === "Anonymous"){
+      newstory.claimcode = generateClaimCode(10)
+    };
+
     // pass story to the database
     result = await db.collection('stories').insertOne(newstory);
 
     //get id of created database entry
-    const storyId = result.insertedId;
+    storyId = result.insertedId;
+    claimcode = newstory.claimcode;
 
-    res.render('pages/submittedstory', { newstory, storyId,  username: req.session.username  });
+    res.render('pages/submittedstory', { newstory, storyId,  username: req.session.username, claimcode });
   }catch (err) {
     // Catch any errors and log them
     console.error("Error submitting story:", err);
@@ -280,7 +332,7 @@ app.get('/login', function(req, res){
     res.redirect('/');
     return;
   }else{
-    res.render('pages/login');
+    res.render('pages/login', { errorMessage: undefined });
   }
 });
 
@@ -292,7 +344,7 @@ app.post('/login', async (req,res) => {
     req.session.loggedin = true;
     res.redirect('/');
   } else {
-    res.send("Username or password is incorrect.");
+    res.render('pages/login', { errorMessage: 'Username or password is incorrect.' });
   }
 });
 
