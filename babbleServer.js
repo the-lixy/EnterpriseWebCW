@@ -140,14 +140,6 @@ app.get('/', async (req, res) => {
     filterOption.genre = genre;
   }
 
-  // get user rankings (now a function)
-  /*
-  let userRanking = await User.find().sort({ avgRating: -1 }).toArray();
-  let userRankingMap = {};
-  userRanking.forEach((user) => {
-    userRankingMap[user.username] = user.avgRating || 0;
-  }); */
-
   let userRankingMap = await getUserRankingMap();
 
   try {
@@ -172,20 +164,6 @@ app.get('/', async (req, res) => {
 
     // if seen is undefined
     if (!seen) {
-      /*
-      let viewedStoryIds = [];
-
-      // logged-in users: fetch viewed stories from DB
-      if (req.session.userId) {
-        const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
-        viewedStoryIds = user?.viewedStories?.map((id) => id.toString()) || [];
-      } else {
-        // guest users: fetch viewed stories from cookies
-        viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
-      }
-
-      // Filter out stories that the user has already seen
-      stories = stories.filter((story) => !viewedStoryIds.includes(story._id.toString())); */
       stories = await getUnseenStories(req, stories);
     }
 
@@ -287,19 +265,6 @@ app.post('/story', async(req,res) => {
       await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : author } })
 
       // update author's average rating
-
-      /*
-      // get all of user's stories
-      const stories = await collection.find({author: author}).toArray(); 
-
-      let userTotalRating = 0;
-
-      for (let i = 0; i < stories.length; i++) {
-        userTotalRating += stories[i].rating;
-      }
-
-      let userAvgRating = Math.round(userTotalRating/stories.length);
-      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } );  */
       await updateUserAverageRating(author);
       
       //console.log("story updated")
@@ -423,19 +388,6 @@ app.post('/rate', async (req, res) => {
       const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
 
       // update author's average rating
-      /*
-      // get all of user's stories
-      let author = story.author;
-      const stories = await collection.find({author: author}).toArray(); 
-
-      let userTotalRating = 0;
-
-      for (let i = 0; i < stories.length; i++) {
-        userTotalRating += stories[i].rating;
-      }
-
-      let userAvgRating = Math.round(userTotalRating/stories.length);
-      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); */
       let author = story.author;
       await updateUserAverageRating(author);
       
@@ -607,14 +559,6 @@ app.get('/foryou', async (req, res) => {
     // Get all stories based on filter
     let stories = await collection.find(filterOption).toArray();
 
-    // Get user rankings
-    /*
-    const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
-    const userRankingMap = {};
-    userRanking.forEach(user => {
-      userRankingMap[user.username] = user.avgRating || 0;
-    }); */
-
     let userRankingMap = getUserRankingMap();
 
     // Sort by author ranking (ignore anonymous)
@@ -625,28 +569,6 @@ app.get('/foryou', async (req, res) => {
 
     // Filter out seen stories
     if (!seen) {
-      /*
-      let viewedStoryIds = [];
-      if (req.session.userId) {
-        const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
-        viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
-
-        // Sort by user's favorite genres
-        if (!genre && user.genreCounts) {
-          const sortedGenres = Object.entries(user.genreCounts)
-            .sort(([, a], [, b]) => b - a)
-            .map(([genre]) => genre);
-
-          // Prioritize stories matching top genres
-          stories = stories.sort((a, b) => {
-            const aPriority = sortedGenres.indexOf(a.genre);
-            const bPriority = sortedGenres.indexOf(b.genre);
-            return (aPriority === -1 ? Infinity : aPriority) - (bPriority === -1 ? Infinity : bPriority);
-          });
-        }
-      }
-
-      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString())); */
       stories = await getUnseenStories(req, stories);
     }
 
