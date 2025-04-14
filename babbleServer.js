@@ -113,6 +113,26 @@ async function updateUserAverageRating(author) {
   await User.updateOne({ username: author }, { $set: { avgRating } });
 }
 
+// get top rater
+async function getTopRater(db, User) {
+  const topRaterAgg = await db.collection('ratings').aggregate([
+    { $group: { _id: "$userId", ratingCount: { $sum: 1 } } },
+    { $sort: { ratingCount: -1 } },
+    { $limit: 1 }
+  ]).toArray();
+
+  if (topRaterAgg.length > 0) {
+    const topUser = await User.findOne({ _id: new ObjectId(topRaterAgg[0]._id) });
+    if (topUser) {
+      return {
+        username: topUser.username,
+        ratingCount: topRaterAgg[0].ratingCount
+      };
+    }
+  }
+  return null;
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Selected port: ${PORT}`);
@@ -168,32 +188,7 @@ app.get('/', async (req, res) => {
     }
 
     // find top rater on the site
-    const topRaterAgg = await db.collection('ratings').aggregate([
-      {
-        $group: {
-          _id: "$userId",          // group by user
-          ratingCount: { $sum: 1 } // count ratings
-        }
-      },
-      {
-        $sort: { ratingCount: -1 } // highest first
-      },
-      {
-        $limit: 1
-      }
-    ]).toArray();
-
-    let topRater = null;
-    if (topRaterAgg.length > 0) {
-      const topUserId = topRaterAgg[0]._id;
-      const topUser = await User.findOne({ _id: new ObjectId(topUserId) });
-      if (topUser) {
-        topRater = {
-          username: topUser.username,
-          ratingCount: topRaterAgg[0].ratingCount
-        };
-      }
-    }
+    let topRater = await getTopRater(db, User)
 
     res.render('pages/homepage', { heading, stories, genre, seen, topRater });
   } catch (err) {
@@ -573,23 +568,7 @@ app.get('/foryou', async (req, res) => {
     }
 
     // Get top rater info
-    const topRaterAgg = await db.collection('ratings').aggregate([
-      { $group: { _id: "$userId", ratingCount: { $sum: 1 } } },
-      { $sort: { ratingCount: -1 } },
-      { $limit: 1 }
-    ]).toArray();
-
-    let topRater = null;
-    if (topRaterAgg.length > 0) {
-      const topUser = await User.findOne({ _id: new ObjectId(topRaterAgg[0]._id) });
-      if (topUser) {
-        topRater = {
-          username: topUser.username,
-          ratingCount: topRaterAgg[0].ratingCount
-        };
-      }
-    }
-
+    let topRater = await getTopRater(db, User)
     res.render('pages/foryou', { stories, genre, seen, topRater });
   }
 });
