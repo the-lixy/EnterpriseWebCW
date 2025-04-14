@@ -247,7 +247,7 @@ app.post('/story', async(req,res) => {
   let claimedStory = await collection.findOne({ _id: new ObjectId(storyId)});
 
   //console.log("Claimed Story:", claimedStory);
-  const inputCode = req.body.claimcode;
+  const inputCode = req.body.claimcode.replace(/\s+/g, ''); //strip any whitespace
   const claimCode = claimedStory.claimcode;
 
   //console.log("user input: " + inputCode + " claimcode: " + claimCode);
