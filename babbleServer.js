@@ -63,6 +63,8 @@ app.use(
   })
 );
 
+//functions ---------------------------------------------
+
 // function to authenticate login
 function checkAuth(req, res, next) {
   if (req.session.userId) return next();
@@ -79,10 +81,21 @@ function generateClaimCode(length = 10) {
   return result;
 }
 
+// get user rankings
+async function getUserRankingMap() {
+  const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
+  const map = {};
+  userRanking.forEach(user => {
+    map[user.username] = user.avgRating || 0;
+  });
+  return map;
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 // pages --------------------------------------
 
@@ -105,12 +118,15 @@ app.get('/', async (req, res) => {
     filterOption.genre = genre;
   }
 
-  // get user rankings
+  // get user rankings (now a function)
+  /*
   let userRanking = await User.find().sort({ avgRating: -1 }).toArray();
   let userRankingMap = {};
   userRanking.forEach((user) => {
     userRankingMap[user.username] = user.avgRating || 0;
-  });
+  }); */
+
+  let userRankingMap = getUserRankingMap();
 
   try {
     // get stories matching the filter criteria
@@ -562,11 +578,14 @@ app.get('/foryou', async (req, res) => {
     let stories = await collection.find(filterOption).toArray();
 
     // Get user rankings
+    /*
     const userRanking = await User.find().sort({ avgRating: -1 }).toArray();
     const userRankingMap = {};
     userRanking.forEach(user => {
       userRankingMap[user.username] = user.avgRating || 0;
-    });
+    }); */
+
+    let userRankingMap = getUserRankingMap();
 
     // Sort by author ranking (ignore anonymous)
     stories = stories.sort((a, b) => {
