@@ -105,6 +105,14 @@ async function getUnseenStories(req, stories) {
   return stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
 }
 
+// update user's average rating upon recieving a new ranking or claiming a story
+async function updateUserAverageRating(author) {
+  const stories = await collection.find({ author }).toArray();
+  const totalRating = stories.reduce((sum, story) => sum + story.rating, 0);
+  const avgRating = stories.length ? Math.round(totalRating / stories.length) : 0;
+  await User.updateOne({ username: author }, { $set: { avgRating } });
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Selected port: ${PORT}`);
@@ -279,6 +287,8 @@ app.post('/story', async(req,res) => {
       await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : author } })
 
       // update author's average rating
+
+      /*
       // get all of user's stories
       const stories = await collection.find({author: author}).toArray(); 
 
@@ -289,7 +299,8 @@ app.post('/story', async(req,res) => {
       }
 
       let userAvgRating = Math.round(userTotalRating/stories.length);
-      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
+      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } );  */
+      await updateUserAverageRating(author);
       
       //console.log("story updated")
       res.redirect(`/story?id=${storyId}`)
@@ -412,6 +423,7 @@ app.post('/rate', async (req, res) => {
       const result = await collection.updateOne({ _id: new ObjectId(id)}, {$set: {totalrating : parseInt(newTotal), numratings: parseInt(newNum), rating: parseInt(newRating)}});
 
       // update author's average rating
+      /*
       // get all of user's stories
       let author = story.author;
       const stories = await collection.find({author: author}).toArray(); 
@@ -423,7 +435,9 @@ app.post('/rate', async (req, res) => {
       }
 
       let userAvgRating = Math.round(userTotalRating/stories.length);
-      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
+      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); */
+      let author = story.author;
+      await updateUserAverageRating(author);
       
 
       res.json({ success: true, modified: result.modifiedCount });
