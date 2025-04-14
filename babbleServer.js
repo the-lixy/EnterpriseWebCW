@@ -91,9 +91,23 @@ async function getUserRankingMap() {
   return map;
 }
 
+// filter viewed stories
+async function getUnseenStories(req, stories) {
+  let viewedStoryIds = [];
+
+  if (req.session.userId) {
+    const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
+    viewedStoryIds = user?.viewedStories?.map(id => id.toString()) || [];
+  } else {
+    viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
+  }
+
+  return stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Selected port: ${PORT}`);
 });
 
 
@@ -126,7 +140,7 @@ app.get('/', async (req, res) => {
     userRankingMap[user.username] = user.avgRating || 0;
   }); */
 
-  let userRankingMap = getUserRankingMap();
+  let userRankingMap = await getUserRankingMap();
 
   try {
     // get stories matching the filter criteria
@@ -150,6 +164,7 @@ app.get('/', async (req, res) => {
 
     // if seen is undefined
     if (!seen) {
+      /*
       let viewedStoryIds = [];
 
       // logged-in users: fetch viewed stories from DB
@@ -162,7 +177,8 @@ app.get('/', async (req, res) => {
       }
 
       // Filter out stories that the user has already seen
-      stories = stories.filter((story) => !viewedStoryIds.includes(story._id.toString()));
+      stories = stories.filter((story) => !viewedStoryIds.includes(story._id.toString())); */
+      stories = await getUnseenStories(req, stories);
     }
 
     // find top rater on the site
@@ -595,6 +611,7 @@ app.get('/foryou', async (req, res) => {
 
     // Filter out seen stories
     if (!seen) {
+      /*
       let viewedStoryIds = [];
       if (req.session.userId) {
         const user = await User.findOne({ _id: new ObjectId(req.session.userId) });
@@ -613,13 +630,10 @@ app.get('/foryou', async (req, res) => {
             return (aPriority === -1 ? Infinity : aPriority) - (bPriority === -1 ? Infinity : bPriority);
           });
         }
-
-      } else {
-        // Guest user
-        viewedStoryIds = req.cookies.seenStories ? JSON.parse(req.cookies.seenStories) : [];
       }
 
-      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString()));
+      stories = stories.filter(story => !viewedStoryIds.includes(story._id.toString())); */
+      stories = await getUnseenStories(req, stories);
     }
 
     // Get top rater info
