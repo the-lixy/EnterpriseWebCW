@@ -213,6 +213,10 @@ app.get('/story', async(req,res) => {
       };
     };
 
+    if(story.visibility == "private" && !req.session.userId){
+      res.redirect('/');
+    };
+
     // mark story as seen
     if(req.session.userId){
       // logged in users (save to db)
