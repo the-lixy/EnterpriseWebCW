@@ -400,6 +400,10 @@ app.post('/delete', async(req,res) => {
   try{
     const {id} = req.body;
     await collection.deleteOne({ _id: new ObjectId(id) });
+
+    // update user's average ranking
+    let author = req.session.username;
+    await updateUserAverageRating(author);
     //res.redirect('/');
   }catch (err) {
     console.error("Error deleting story:", err);
