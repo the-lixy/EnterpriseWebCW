@@ -2,6 +2,29 @@
     <head>
         <title> Sign Up to Babbler </title>
         <%- include('../partials/imports'); %>
+
+        <!-- script to show and hide hints for username and password format -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const usernameInput = document.getElementById('username');
+                const usernameHint = document.getElementById('usernameHint');
+              
+                const passwordInput = document.getElementById('password');
+                const passwordHint = document.getElementById('passwordHint');
+              
+                function validateInput(input, hint) {
+                  if (input.validity.valid || input.value === '') {
+                    hint.style.display = 'none';
+                  } else {
+                    hint.style.display = 'block';
+                  }
+                }
+              
+                usernameInput.addEventListener('input', () => validateInput(usernameInput, usernameHint));
+                passwordInput.addEventListener('input', () => validateInput(passwordInput, passwordHint));
+            });
+
+          </script>
     </head>
     
     <!-- partial - navbar header -->
@@ -16,13 +39,22 @@
 
                 <div class="form-group">
                     <label for="username">Username:</label>
-                    <input type="text" class="form-control" name="username" pattern="^[a-zA-Z0-9_]+$" title="Username can only contain letters, numbers, and underscores"  required maxlength="30">
+                    <input type="text" class="form-control" name="username" id="username" pattern="^[a-zA-Z0-9_]+$" required maxlength="30">
+
+                    <div id="usernameHint" style="display: none" class="panel panel-danger">
+                        <div class="panel-heading">  Username can only contain letters, numbers and underscores. </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password:</label>
-                    <input type="password" class="form-control" name="password" required maxlength="30" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                    title="Must contain at least one  number and one uppercase and lowercase letter, and at least 8 or more characters">
+                    <!-- <small>Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters.</small> -->
+                    <input type="password" class="form-control" name="password" id="password" required maxlength="30" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                    title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+
+                    <div id="passwordHint" style="display: none" class="panel panel-danger">
+                        <div class="panel-heading">  Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters. </div>
+                    </div>
                 </div>
 
                 <!-- TODO: Insert confirm password here -->
