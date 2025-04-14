@@ -245,6 +245,21 @@ app.post('/story', async(req,res) => {
     if(inputCode == claimCode){
       //console.log("claimcode accepted")
       await db.collection('stories').updateOne({  _id: new ObjectId(storyId)}, { $set: { author : author } })
+
+      // update author's average rating
+      // get all of user's stories
+      let author = story.author;
+      const stories = await collection.find({author: author}).toArray(); 
+
+      let userTotalRating = 0;
+
+      for (let i = 0; i < stories.length; i++) {
+        userTotalRating += stories[i].rating;
+      }
+
+      let userAvgRating = Math.round(userTotalRating/stories.length);
+      User.updateOne( { username: author }, { $set: { avgRating: userAvgRating } } ); 
+      
       //console.log("story updated")
       res.redirect(`/story?id=${storyId}`)
 
@@ -367,7 +382,7 @@ app.post('/rate', async (req, res) => {
 
       // update author's average rating
       // get all of user's stories
-      let author = story.author; // TODO: maybe change this to be id for security?
+      let author = story.author;
       const stories = await collection.find({author: author}).toArray(); 
 
       let userTotalRating = 0;
