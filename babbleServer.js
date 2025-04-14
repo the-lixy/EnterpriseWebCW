@@ -248,7 +248,6 @@ app.post('/story', async(req,res) => {
 
       // update author's average rating
       // get all of user's stories
-      let author = story.author;
       const stories = await collection.find({author: author}).toArray(); 
 
       let userTotalRating = 0;
